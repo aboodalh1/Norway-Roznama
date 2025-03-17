@@ -1,0 +1,101 @@
+name: norway_roznama_new_project
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  flutter_bloc: ^9.0.0
+  dio: ^5.7.0
+  flutter_screenutil: ^5.9.3
+  dartz: ^0.10.1
+  get_it: ^8.0.3
+  flutter_launcher_icons: ^0.14.2
+  mobile_scanner: ^6.0.5
+  fancy_shimmer_image: ^2.0.3
+  path_provider: ^2.1.4
+  share_plus: ^10.0.0
+  percent_indicator: ^4.2.4
+  geolocator: ^13.0.2
+  intl: ^0.20.2
+  flutter_compass: ^0.8.1
+  flutter_html: ^3.0.0-beta.2
+  permission_handler: ^11.3.1
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
+  shared_preferences: ^2.5.1
+  audioplayers: ^6.2.0
+  workmanager: ^0.5.2
+  flutter_timezone: ^4.1.0
+  firebase_core: ^3.12.1
+  jhijri: ^1.0.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^5.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/img/
+    - assets/icons/
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter_28pt-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Inter_28pt-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter_28pt-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Inter_28pt-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Inter_28pt-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Inter_28pt-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter_28pt-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter_28pt-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter_28pt-Thin.ttf
+          weight: 100
+
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
