@@ -16,11 +16,9 @@ class BasePage extends StatefulWidget {
 }
 
 class _BasePageState extends State<BasePage> {
-
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -39,24 +37,16 @@ class _BasePageState extends State<BasePage> {
           body: state is GetPraysTimesLoading || state is LocationLoadingState
               ? BasePageLoadingState()
               : state is GetPrayersTimesError
-              ? BasePagePraysError(praysCubit: praysCubit,error: state.error,)
-              :
-              state is LocationMissedState ||
-              state is LocationFailureState
-              ? BasePageLocationMissed(praysCubit: praysCubit)
-              : BasePageBody(praysCubit: praysCubit),
+                  ? BasePagePraysError(
+                      praysCubit: praysCubit,
+                      error: state.error,
+                    )
+                  : state is LocationMissedState ||
+                          state is LocationFailureState
+                      ? BasePageLocationMissed(praysCubit: praysCubit)
+                      : BasePageBody(praysCubit: praysCubit),
         );
       },
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

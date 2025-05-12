@@ -39,7 +39,6 @@ class ArticlesRepoImpl implements ArticlesRepo{
       });
       return right(response);
     }catch (e) {
-      print(e.toString());
       if (e is DioException) {
 
         return left(ServerFailure.fromDioError(e));

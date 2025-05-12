@@ -1,48 +1,43 @@
 {
-  "project_info": {
-    "project_number": "123668889484",
-    "project_id": "norway-roznama",
-    "storage_bucket": "norway-roznama.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:123668889484:android:b1efb33c6d20a05ca420a9",
-        "android_client_info": {
-          "package_name": "com.example.norway_roznama_new_project"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDiXCY7wbMt24R7F_Vl_i7HdJ_iTMwwQxY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
+    "project_info": {
+        "project_number": "123668889484",
+        "project_id": "norway-roznama",
+        "storage_bucket": "norway-roznama.firebasestorage.app"
     },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:123668889484:android:cc1841f3d1fb1597a420a9",
-        "android_client_info": {
-          "package_name": "com.example.norway_roznama_new_project1"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
+    "client": [{
+            "client_info": {
+                "mobilesdk_app_id": "1:123668889484:android:b1efb33c6d20a05ca420a9",
+                "android_client_info": {
+                    "package_name": "com.example.norway_roznama_new_project"
+                }
+            },
+            "oauth_client": [],
+            "api_key": [{
+                "current_key": "AIzaSyDiXCY7wbMt24R7F_Vl_i7HdJ_iTMwwQxY"
+            }],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": []
+                }
+            }
+        },
         {
-          "current_key": "AIzaSyDiXCY7wbMt24R7F_Vl_i7HdJ_iTMwwQxY"
+            "client_info": {
+                "mobilesdk_app_id": "1:123668889484:android:cc1841f3d1fb1597a420a9",
+                "android_client_info": {
+                    "package_name": "com.example.norway_roznama_new_project"
+                }
+            },
+            "oauth_client": [],
+            "api_key": [{
+                "current_key": "AIzaSyDiXCY7wbMt24R7F_Vl_i7HdJ_iTMwwQxY"
+            }],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": []
+                }
+            }
         }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
+    ],
+    "configuration_version": "1"
 }

@@ -6,9 +6,9 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../../../../../core/util/constant.dart';
 import '../../../../prays_and_qiblah/presentation/manger/prays_cubit.dart';
 
-
 class PrayerBigClock extends StatefulWidget {
-  const PrayerBigClock({super.key, required this.index, required this.praysCubit});
+  const PrayerBigClock(
+      {super.key, required this.index, required this.praysCubit});
   final int index;
   final PraysCubit praysCubit;
 
@@ -18,9 +18,9 @@ class PrayerBigClock extends StatefulWidget {
 
 class _PrayerBigClockState extends State<PrayerBigClock> {
   late Timer _timer;
-   Duration _remainingTime=Duration(seconds: 0);
+  Duration _remainingTime = Duration(seconds: 0);
   late DateTime _prayerTime;
-  late int _totalSeconds;
+  late int _totalMinutes;
   double _progress = 0.0; // Start full
 
   @override
@@ -30,23 +30,20 @@ class _PrayerBigClockState extends State<PrayerBigClock> {
   }
 
   void _initializeCountdown() {
+    Future.delayed(Duration(microseconds: 200), () {
+      DateTime now = DateTime.now();
+      _prayerTime = widget.praysCubit.datePraysTimes[widget.index];
+      if (_prayerTime.isBefore(now)) {
+        _prayerTime = _prayerTime.add(const Duration(days: 1));
+      }
 
+      _totalMinutes = _prayerTime.difference(now).inMinutes;
 
-    DateTime now = DateTime.now();
-    _prayerTime = widget.praysCubit.datePraysTimes[widget.index];
-    if (_prayerTime.isBefore(now)) {
-      _prayerTime = _prayerTime.add(const Duration(days: 1));
-    }
-
-    // Calculate total seconds
-    _totalSeconds = _prayerTime.difference(now).inSeconds;
-
-
-    _updateCountdown();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _updateCountdown();
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        _updateCountdown();
+      });
     });
-
   }
 
   void _updateCountdown() {
@@ -57,9 +54,7 @@ class _PrayerBigClockState extends State<PrayerBigClock> {
         _remainingTime = Duration.zero;
         _progress = 0.0;
       } else {
-
-        _progress = (_totalSeconds - _remainingTime.inSeconds) / _totalSeconds;
-
+        _progress = (_totalMinutes - _remainingTime.inMinutes) / _totalMinutes;
       }
     });
   }
@@ -73,7 +68,6 @@ class _PrayerBigClockState extends State<PrayerBigClock> {
 
   @override
   void dispose() {
-
     _timer.cancel();
     super.dispose();
   }
@@ -87,22 +81,26 @@ class _PrayerBigClockState extends State<PrayerBigClock> {
       lineWidth: 15.0.w,
       animation: true,
       animateFromLastPercent: true,
-      percent: _remainingTime.inMinutes < 0 ? 0 : _progress, // Dynamic percentage update
+      percent: _remainingTime.inMinutes < 0
+          ? 0
+          : _progress, // Dynamic percentage update
       animateToInitialPercent: false, // Disable animation to prevent flickering
-      widgetIndicator: Icon(Icons.circle, color: Colors.grey.shade200, size: 30.sp),
+      widgetIndicator:
+          Icon(Icons.circle, color: Colors.grey.shade200, size: 30.sp),
       center: Container(
         width: 160.w,
-        decoration: BoxDecoration(
-          color: kGreyColor,
-          shape: BoxShape.circle
-        ),
+        decoration: BoxDecoration(color: kGreyColor, shape: BoxShape.circle),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('الوقت المتبقي', style: TextStyle(fontSize: 18.sp, color: Colors.black)),
+            Text('الوقت المتبقي',
+                style: TextStyle(fontSize: 18.sp, color: Colors.black)),
             Text(
               widget.praysCubit.praysName[widget.index],
-              style: TextStyle(fontSize: 22.sp, color: Colors.black, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 22.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
             ),
             Text(
               _formatDuration(_remainingTime),

@@ -10,25 +10,11 @@ import '../../../../../core/widgets/custom_loading_indicator.dart';
 import '../../manger/articles_cubit.dart';
 import 'article_details_page.dart';
 
-class SpecificDoorArticlesBody extends StatefulWidget {
+class SpecificDoorArticlesBody extends StatelessWidget {
   const SpecificDoorArticlesBody({
     super.key, required this.doorName,
   });
   final String doorName;
-  @override
-  State<SpecificDoorArticlesBody> createState() => _SpecificDoorArticlesBodyState();
-}
-
-class _SpecificDoorArticlesBodyState extends State<SpecificDoorArticlesBody> {
-  late ArticlesCubit _articlesCubit;
-
-  @override
-  void initState() {
-    super.initState();
-    _articlesCubit = context.read<ArticlesCubit>();
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ArticlesCubit, ArticlesState>(
@@ -93,7 +79,7 @@ class _SpecificDoorArticlesBodyState extends State<SpecificDoorArticlesBody> {
                       return InkWell(
                         onTap: () {
                           navigateTo(context, ArticleDetailsPage(
-                              doorName: widget.doorName,
+                              doorName: doorName,
                               htmlFreeContent: articlesCubit.allBlogsModelSpecific
                                   .data[index].htmlFreeContent,
                               title: articlesCubit.allBlogsModelSpecific

@@ -2,25 +2,23 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-
 import '../../../../../../core/util/constant.dart';
 import '../../manger/prays_cubit.dart';
 
 class NearestTimeClock extends StatefulWidget {
-  const NearestTimeClock(
-      {super.key, required this.praysCubit});
+  const NearestTimeClock({super.key, required this.praysCubit});
 
   final PraysCubit praysCubit;
 
   @override
   _NearestTimeClockState createState() => _NearestTimeClockState();
 }
-
+  
 class _NearestTimeClockState extends State<NearestTimeClock> {
   late Timer _timer;
-  Duration _remainingTime = Duration(seconds: 0);
-  late DateTime _prayerTime;
-  late int _totalSeconds;
+  Duration _remainingTime = Duration(minutes: 0);
+  late DateTime _nearestPrayTime;
+  late int _totalMinutes;
   double _progress = 0.0; // Start full
 
   @override
@@ -32,14 +30,20 @@ class _NearestTimeClockState extends State<NearestTimeClock> {
   void _initializeCountdown() {
     Future.delayed(Duration(seconds: 2), () {
       DateTime now = DateTime.now();
-      _prayerTime = widget.praysCubit.getNearestPrayerTime()!;
-      if (_prayerTime.isBefore(now)) {
-        _prayerTime = _prayerTime.add(const Duration(days: 1));
+      _nearestPrayTime = widget.praysCubit.getNearestPrayTime()!;
+      if (_nearestPrayTime.isBefore(now)) {
+        _nearestPrayTime = _nearestPrayTime.add(const Duration(days: 1));
       }
-
-      // Calculate total seconds
-      _totalSeconds = _prayerTime.difference(now).inSeconds;
-
+      _totalMinutes = widget.praysCubit.neartestPrayIndex == 0
+          ? _nearestPrayTime.day == widget.praysCubit.datePraysTimes[6].day
+              ? (now.difference(_nearestPrayTime).inMinutes * -1)
+              : (_nearestPrayTime 
+                  .difference(widget.praysCubit.datePraysTimes[6])
+                  .inMinutes)
+          : _nearestPrayTime
+              .difference(widget.praysCubit
+                  .datePraysTimes[widget.praysCubit.neartestPrayIndex - 1])
+              .inMinutes;
       _updateCountdown();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         _updateCountdown();
@@ -49,13 +53,13 @@ class _NearestTimeClockState extends State<NearestTimeClock> {
 
   void _updateCountdown() {
     setState(() {
-      _remainingTime = _prayerTime.difference(DateTime.now());
+      _remainingTime = _nearestPrayTime.difference(DateTime.now());
       if (_remainingTime.isNegative) {
         _timer.cancel();
         _remainingTime = Duration.zero;
         _progress = 0.0;
       } else {
-        _progress = (_totalSeconds - _remainingTime.inSeconds) / _totalSeconds;
+        _progress = (_totalMinutes - _remainingTime.inMinutes) / _totalMinutes;
       }
     });
   }
@@ -82,7 +86,7 @@ class _NearestTimeClockState extends State<NearestTimeClock> {
       lineWidth: 15.0.w,
       animation: true,
       animateFromLastPercent: true,
-      percent: _remainingTime.inMinutes < 0 ? 0 : _progress,
+      percent: _remainingTime.inMinutes < 0 ? 0 : _progress>=0 &&_progress<=1?_progress:0.0,
       animateToInitialPercent: false,
       // Disable animation to prevent flickering
       widgetIndicator:

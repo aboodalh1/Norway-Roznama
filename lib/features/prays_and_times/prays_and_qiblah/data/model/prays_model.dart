@@ -54,6 +54,7 @@ class Timings {
     required this.Sunrise,
     required this.Dhuhr,
     required this.Asr,
+    required this.AsrShadow,
     required this.Maghrib,
     required this.Isha,
   });
@@ -61,6 +62,7 @@ class Timings {
   late final String Sunrise;
   late final String Dhuhr;
   late final String Asr;
+  late final String AsrShadow;
   late final String Maghrib;
   late final String Isha;
 
@@ -69,6 +71,7 @@ class Timings {
     Sunrise = json['Sunrise'];
     Dhuhr = json['Dhuhr'];
     Asr = json['Asr'];
+    AsrShadow = json['Asr_2x_shadow'];
     Maghrib = json['Maghrib'];
     Isha = json['Isha'];
   }

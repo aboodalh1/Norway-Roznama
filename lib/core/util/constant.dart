@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import '../../features/prays_and_times/prays_settings/data/model/pray_model.dart';
 
-List<String>arabicDays=[
-  "السبت",
-  "الأحد",
+List<String> arabicDays = [
   "الأثنين",
   "الثلاثاء",
   "الأربعاء",
   "الخميس",
   "الجمعة",
+  "الأحد",
+  "السبت",
 ];
 
-List<String>monthNames=[
+List<String> monthNames = [
   "محرم",
   "صفر",
   "ربيع الأول",
@@ -29,13 +28,15 @@ List<String>monthNames=[
   "ذي الحجه",
 ];
 
-
-bool is24HourFormat() {
-  String formattedTime = DateFormat.jm().format(DateTime.now());
-  return !formattedTime.contains('AM') && !formattedTime.contains('PM');
-}
-
-
+Map<String,String> days = {
+  "Sat":"السبت",
+  "Sun":"الأحد",
+  "Mon":"الأثنين",
+  "Tue":"الثلاثاء",
+  "Wed":"الأربعاء",
+  "Thu":"الخميس",
+  "Fri":"الجمعة"
+  };
 
 
 Color kPrimaryColor = const Color(0xFF057107);
@@ -44,11 +45,11 @@ Color kBlackGrey = const Color(0xff535763);
 Color kGreyColor = const Color(0xffD9D9D9);
 Color kPinkColor = const Color(0xffFF1C6B);
 Color kBlackGreyColor = const Color(0xFFAEAEAE);
-List<String>adhanDownloaded=['false','false','false','false'];
+List<String> adhanDownloaded = ['false', 'false', 'false', 'false','false'];
 double latitude = 0;
 double longitude = 0;
 
-   LocationPermission permission= LocationPermission.denied;
+LocationPermission permission = LocationPermission.denied;
 Future<Position> getUserLocation() async {
   bool serviceEnabled;
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -60,12 +61,8 @@ Future<Position> getUserLocation() async {
   permission = await Geolocator.checkPermission();
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-    }
+    
   }
-
-  if (permission == LocationPermission.deniedForever) {
-     }
 
   return await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
@@ -78,16 +75,23 @@ void fetchLocation() async {
     longitude = position.longitude;
     CacheHelper.saveData(key: 'lat', value: latitude);
     CacheHelper.saveData(key: 'lon', value: longitude);
-  } catch (e) {
-  }
+  } catch (e) {}
 }
 
 List<PrayModel> prayList = [
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5,readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5,readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5,readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5,readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5,readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5,readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
 ];
 
+List<PrayModel> nawafelList = [
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0)
+];

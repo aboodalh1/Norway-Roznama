@@ -20,12 +20,10 @@ class ArticlesBody extends StatefulWidget {
 }
 
 class _ArticlesBodyState extends State<ArticlesBody> {
-  late ArticlesCubit _articlesCubit;
 
   @override
   void initState() {
     super.initState();
-    _articlesCubit = context.read<ArticlesCubit>();
   }
 
 

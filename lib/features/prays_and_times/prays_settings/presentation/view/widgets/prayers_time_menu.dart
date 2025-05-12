@@ -22,17 +22,18 @@ class FareedaSettingsList extends StatelessWidget {
           curve: Curves.easeInOut,
           height: praysSettingsCubit.isExpand
               ? praysSettingsCubit.isFaredaExpand
-                  ? 540
-                  : 435
+                  ? 620
+                  : 510
               : 0,
           child: ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 6,
+              itemCount: 7,
               itemBuilder: (context, index) {
                 return FaredaTile(
                     praysSettingsCubit: praysSettingsCubit,
                     index: index,
-                    praysCubit: praysCubit);
+                    praysCubit: praysCubit
+                );
               }),
         ),
 

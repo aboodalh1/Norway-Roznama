@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:media_scanner/media_scanner.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/model/adhan_model.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/repo/adhan_repo.dart';
@@ -13,106 +15,119 @@ import '../../../../../core/util/constant.dart';
 part 'prays_settings_state.dart';
 
 class PraysSettingsCubit extends Cubit<PraysSettingsState> {
-  PraysSettingsCubit(this.adhanRepo) : super(PraysSettingsInitial()){
-    if(CacheHelper.getData(key: 'is_adhan_links_downloaded')!=null){
-      isAdhanLinkDownloaded = CacheHelper.getData(key: 'is_adhan_links_downloaded');
+  PraysSettingsCubit(this.adhanRepo) : super(PraysSettingsInitial()) {
+    if (CacheHelper.getData(key: 'is_adhan_links_downloaded') != null) {
+      isAdhanLinkDownloaded =
+          CacheHelper.getData(key: 'is_adhan_links_downloaded');
     }
-    if(CacheHelper.getData(key: 'adhan_list')!=null){
-      adhanList=CacheHelper.getData(key: 'adhan_list');
+    if (CacheHelper.getData(key: 'adhan_list') != null) {
+      adhanList = CacheHelper.getData(key: 'adhan_list');
+    }
+    for(int i=0; i<prayList.length;i++){
+      if(  CacheHelper.getData(
+          key: "pray_reader$i")!=null){
+        prayList[i].readerId =CacheHelper.getData(
+            key: "pray_reader$i");
+      }
+      prayList[i].reader = readers[prayList[i].readerId];
     }
     getAdhan();
-  if(CacheHelper.getData(key: 'adhan_downloaded')!=null){
-    adhanDownloaded=CacheHelper.getData(key: 'adhan_downloaded');
+    if (CacheHelper.getData(key: 'adhan_downloaded') != null) {
+      adhanDownloaded = CacheHelper.getData(key: 'adhan_downloaded');
+    } else {
+      adhanDownloaded = [
+        'false',
+        'false',
+        'false',
+        'false',
+      ];
+      CacheHelper.saveData(key: 'adhan_downloaded', value: adhanDownloaded);
+    }
   }
 
-  else {
-    adhanDownloaded=[
-      'false',
-      'false',
-      'false',
-      'false',
-    ];
-    CacheHelper.saveData(key: 'adhan_downloaded', value: adhanDownloaded);
-  }
-  }
-
-  List<bool>isDonwloading=[
+  List<bool> isDonwloading = [
     false,
     false,
     false,
     false,
   ];
-  List<bool>isPlaying=[
+  List<bool> isPlaying = [
     false,
     false,
     false,
     false,
   ];
 
-  String savePath='';
+  String savePath = ''; 
   AdhanRepo adhanRepo;
-  Future<String?> downloadAdhan(int index,String url, String fileName) async {
-    isDonwloading[index]=true;
+  Future<String?> downloadAdhan(int index, String url, String fileName) async {
+    isDonwloading[index] = true;
     emit(AdhanDownloadLoading());
     if (await Permission.storage.request().isGranted) {
       try {
-        final directory = await getApplicationDocumentsDirectory();
-         savePath = "${directory.path}/$fileName.mp3";
-        adhanDownloaded[index]=savePath;
+        final directory = await getExternalStorageDirectory();
+  
+        savePath = "${directory!.path}/dd.mp3";
+        await MediaScanner.loadMedia(path: savePath);
+        await Directory("${directory.path}/Notifications")
+            .create(recursive: true);
+        adhanDownloaded[index] = savePath;
         CacheHelper.saveData(key: 'adhan_downloaded', value: adhanDownloaded);
         await Dio().download(url, savePath);
-        isDonwloading[index]=false;
+        isDonwloading[index] = false;  
+
         emit(AdhanDownloadSuccess(message: "تم تحميل الأذان بنجاح"));
         return savePath;
       } catch (e) {
-        isDonwloading[index]=false;
+        isDonwloading[index] = false;
         emit(AdhanDownloadFailure(error: 'فشل تحميل الاذان'));
         return null;
       }
     } else {
-      emit(AdhanDownloadFailure(error:"تم رفض اذن السماح بالتخزين في الجهاز"));
+      emit(AdhanDownloadFailure(error: "تم رفض اذن السماح بالتخزين في الجهاز"));
       return null;
     }
   }
+
   String reader = 'مشاري العفاسي';
   String lastReader = 'مشاري العفاسي';
 
   bool isAdhanLinkDownloaded = false;
 
-  String adhanList='';
+  String adhanList = '';
 
   List<String> readers = [
     "مشاري العفاسي",
     "ياسر الدوسري",
     "محمود الحصري",
     "عبدالباسط عبدالصمد",
+    "صوت الاشعار الافتراضي",
   ];
 
-   AdhanModel adhanModel=AdhanModel(success: false, message: '', data: []);
+  AdhanModel adhanModel = AdhanModel(success: false, message: '', data: []);
 
-   final player = AudioPlayer();
+  final player = AudioPlayer();
   void playLocalAdhan(int index) async {
-    print(adhanDownloaded[index]);
     await player.play(DeviceFileSource(adhanDownloaded[index]));
   }
 
   Future<void> getAdhan() async {
-    if(!isAdhanLinkDownloaded)emit(GetAdhanLoading());
+    if (!isAdhanLinkDownloaded) emit(GetAdhanLoading());
     var result = await adhanRepo.getAdhan();
-    result.fold((failure) {
-    }, (response) {
+    result.fold((failure) {}, (response) {
       if (response.data['success'] == false) {
         if (response.data['message'].contains("Validation")) {
-          if(!isAdhanLinkDownloaded)emit(GetAdhanFailure(error: "الرجاء الغاء تفعيل برامج الVPN"));
+          if (!isAdhanLinkDownloaded)
+            emit(GetAdhanFailure(error: "الرجاء الغاء تفعيل برامج الVPN"));
           return;
         }
-        if(!isAdhanLinkDownloaded)emit(GetAdhanFailure(error: response.data['message']));
+        if (!isAdhanLinkDownloaded)
+          emit(GetAdhanFailure(error: response.data['message']));
         return;
       }
-      adhanModel= AdhanModel.fromJson(response.data);
-      isAdhanLinkDownloaded=true;
-      CacheHelper.saveData(key: 'is_adhan_links_downloaded',
-          value: true);
+      adhanModel = AdhanModel.fromJson(response.data);
+      isAdhanLinkDownloaded = true;
+      CacheHelper.saveData(key: 'is_adhan_links_downloaded', value: true);
       Map<String, dynamic> adhanList = jsonDecode(json.encode(response.data));
       final adhanEncode = jsonEncode(adhanList);
       CacheHelper.saveData(key: 'adhan_list', value: adhanEncode);
@@ -129,8 +144,16 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
 
   void confirmReader(int index) {
     lastReader = faredaReader;
-    prayList[index].reader=faredaReader;
-    prayList[index].readerId=faredaReader=="مشاري العفاسي"?0:faredaReader=="ياسر الدوسري"?1:faredaReader=="الحصري"?2:3;
+    prayList[index].reader = faredaReader;
+    prayList[index].readerId = faredaReader == "مشاري العفاسي"
+        ? 0
+        : faredaReader == "ياسر الدوسري"
+            ? 1
+            : faredaReader == "محمود الحصري"
+                ? 2
+                : faredaReader == "عبدالباسط عبدالصمد"?3:4;
+    CacheHelper.saveData(
+        key: "pray_reader$index", value: prayList[index].readerId);
     emit(ChangeReaderState());
   }
 
@@ -141,7 +164,7 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
     emit(ChangeSwitchState());
   }
 
-  bool isExpand = false;
+  bool isExpand = true;
 
   bool isFaredaExpand = false;
 
@@ -171,8 +194,6 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
     emit(ChangeExpandState());
   }
 
-
-
   void updateFaredaReader(String name, int index) {
     prayList[index].reader = name;
     emit(ChangeFaredaState());
@@ -187,6 +208,7 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
   double faredaTime = 5;
 
   List<bool> faredaExpandationValue = [
+    false,
     false,
     false,
     false,

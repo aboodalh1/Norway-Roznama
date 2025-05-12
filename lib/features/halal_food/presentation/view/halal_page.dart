@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:norway_roznama_new_project/core/util/service_locator.dart';
+import 'package:norway_roznama_new_project/features/halal_food/data/repos/halal_repo_impl.dart';
 
 import '../../../../core/util/constant.dart';
 import '../../../../core/util/functions.dart';
@@ -16,7 +18,7 @@ class HalalPage extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: BlocProvider(
-  create: (context) => HalalCubit(),
+  create: (context) => HalalCubit(getIt.get<HalalRepoImpl>()),
   child: BlocConsumer<HalalCubit, HalalState>(
   listener: (context, state) {},
   builder: (context, state) {

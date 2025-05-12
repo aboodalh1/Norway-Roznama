@@ -11,6 +11,8 @@ import 'package:norway_roznama_new_project/features/articles_and_stickers/sticke
 import 'package:norway_roznama_new_project/features/articles_and_stickers/stickers/presentation/stickers_error_body.dart';
 import 'package:norway_roznama_new_project/features/articles_and_stickers/stickers/presentation/stickers_loading_body.dart';
 
+import '../../../../core/widgets/end_of_content_widget.dart';
+import '../../../../core/widgets/loading_more_indicator.dart';
 import '../manger/stickers/stickers_cubit.dart';
 
 class StickersPage extends StatelessWidget {
@@ -41,7 +43,7 @@ class StickersPage extends StatelessWidget {
         builder: (context, state) {
           StickersCubit stickersCubit = context.read<StickersCubit>();
           return BlocBuilder<CategoriesCubit, CategoriesState>(
-            builder: (context, state1) {
+            builder: (context, catState) {
               CategoriesCubit categoriesCubit = context.read<CategoriesCubit>();
               return Directionality(
                 textDirection: TextDirection.rtl,
@@ -57,125 +59,119 @@ class StickersPage extends StatelessWidget {
                           size: 25.sp,
                         )),
                     title: Text(
-                      "المصلقات",
+                      "الملصقات",
                       style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.white),
                     ),
                   ),
-                  body: state1 is CategoriesLoadingState
+                  body: catState is CategoriesLoadingState
                       ? StickerLoadingBody()
-                      : state1 is CategoriesErrorState
-                      ? StickersErrorBody(error: state1.error)
-                      : Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 29, horizontal: 15.0),
-                    child: SingleChildScrollView(
-                      controller: stickersCubit.scrollController,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            child: ListView.separated(
-                              physics:
-                              const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              separatorBuilder: (context, catIndex) {
-                                return Divider(
-                                  thickness: 0.7,
-                                  height: 40.h,
-                                  color: Color(0xffAEAEAE),
-                                );
-                              },
-                              itemCount: categoriesCubit
-                                  .categoriesModel.data.length,
-                              itemBuilder: (context, catIndex) =>
-                                  Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(categoriesCubit.categoriesModel
-                                                .data[catIndex].name),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 10.h,
-                                        ),
-                                        Stack(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                SizedBox(
-                                                  height: 83.h,
-                                                  child: ListView.separated(
-                                                      scrollDirection:
-                                                      Axis.horizontal,
-                                                      shrinkWrap: true,
-                                                      itemBuilder:
-                                                          (context, index) {
-                                                        return StickerCard(
-                                                          categoriesCubit: categoriesCubit,
-                                                          index: index,
-                                                          stickersCubit:
-                                                          stickersCubit,
-                                                          catIndex: catIndex,
-                                                        );
-                                                      },
-                                                      separatorBuilder:
-                                                          (context, index) {
-                                                        return SizedBox(
-                                                          width: 7.85.w,
-                                                        );
-                                                      },
-                                                      itemCount: categoriesCubit
-                                                          .categoriesModel
-                                                          .data[catIndex]
-                                                          .stickers
-                                                          .length),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        )
-                                      ]),
+                      : catState is CategoriesErrorState
+                          ? StickersErrorBody(error: catState.error)
+                          : Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 29, horizontal: 15.0),
+                              child: SingleChildScrollView(
+                                controller: stickersCubit.scrollController,
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      child: ListView.separated(
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        shrinkWrap: true,
+                                        separatorBuilder: (context, catIndex) {
+                                          return Divider(
+                                            thickness: 0.7,
+                                            height: 40.h,
+                                            color: Color(0xffAEAEAE),
+                                          );
+                                        },
+                                        itemCount: categoriesCubit
+                                            .categoriesModel.data.length,
+                                        itemBuilder: (context, catIndex) =>
+                                            Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                              Row(
+                                                children: [
+                                                  Text(categoriesCubit
+                                                      .categoriesModel
+                                                      .data[catIndex]
+                                                      .name),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 10.h,
+                                              ),
+                                              Stack(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        height: 83.h,
+                                                        child:
+                                                            ListView.separated(
+                                                                scrollDirection:
+                                                                    Axis
+                                                                        .horizontal,
+                                                                shrinkWrap:
+                                                                    true,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  return StickerCard(
+                                                                    categoriesCubit:
+                                                                        categoriesCubit,
+                                                                    index:
+                                                                        index,
+                                                                    stickersCubit:
+                                                                        stickersCubit,
+                                                                    catIndex:
+                                                                        catIndex,
+                                                                  );
+                                                                },
+                                                                separatorBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  return SizedBox(
+                                                                    width:
+                                                                        7.85.w,
+                                                                  );
+                                                                },
+                                                                itemCount: categoriesCubit
+                                                                    .categoriesModel
+                                                                    .data[
+                                                                        catIndex]
+                                                                    .stickers
+                                                                    .length),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              )
+                                            ]),
+                                      ),
+                                    ),
+                                    if (catState is MoreCategoriesLoadingState)
+                                      LoadingMoreIndicator(),
+                                    if (catState is MoreCategoriesErrorState)
+                                      MoreCategoriesErrorWidget(
+                                          categoriesCubit: categoriesCubit,
+                                          error: catState.error,
+                                          stickersCubit: stickersCubit),
+                                    if (categoriesCubit
+                                        .newCategoriesModel.links.next.isEmpty)
+                                      EndOfContentWidget(
+                                        text: " انتهت الملصقات المتوفرة",
+                                      ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                          if (state1 is MoreCategoriesLoadingState)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                  width: 30.w,
-                                  height: 35.h,
-                                  child: CircularProgressIndicator(
-                                    color: kPrimaryColor,
-                                  )),
-                            ),
-                          if (state1 is MoreCategoriesErrorState)
-                            MoreCategoriesErrorWidget(
-                              categoriesCubit: categoriesCubit,
-                                error: state1.error,
-                                stickersCubit: stickersCubit),
-                          if (categoriesCubit
-                              .newCategoriesModel.links.next.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                  width: 190.w,
-                                  height: 35.h,
-                                  child: Center(
-                                      child: Text(
-                                        " انتهت الملصقات المتوفرة",
-                                        style: TextStyle(
-                                            fontSize: 15.sp,
-                                            color: Colors.black),
-                                      ))),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
               );
             },
@@ -186,13 +182,17 @@ class StickersPage extends StatelessWidget {
   }
 }
 
+
+
 class StickerCard extends StatelessWidget {
   const StickerCard({
     super.key,
     required this.stickersCubit,
     required this.catIndex,
-    required this.index, required this.categoriesCubit,
+    required this.index,
+    required this.categoriesCubit,
   });
+
   final CategoriesCubit categoriesCubit;
   final StickersCubit stickersCubit;
   final int catIndex;
@@ -211,9 +211,11 @@ class StickerCard extends StatelessWidget {
               context: context,
               builder: (context) {
                 return StickerDialog(
-                    stickerIndex: index,
-                    catIndex: catIndex,
-                    stickersCubit: stickersCubit, categoriesCubit: categoriesCubit,);
+                  stickerIndex: index,
+                  catIndex: catIndex,
+                  stickersCubit: stickersCubit,
+                  categoriesCubit: categoriesCubit,
+                );
               });
         }
       },
@@ -254,10 +256,10 @@ class StickerCard extends StatelessWidget {
                     ),
                     child: Center(
                         child: Icon(
-                          Icons.share,
-                          color: kPinkColor,
-                          size: 15.sp,
-                        )),
+                      Icons.share,
+                      color: kPinkColor,
+                      size: 15.sp,
+                    )),
                   ),
                 ),
               ),
@@ -282,17 +284,16 @@ class StickerCard extends StatelessWidget {
                       color: Colors.white,
                     ),
                     child: BlocBuilder<StickersCubit, StickersState>(
-                      builder: (context, state) =>
-                          Center(
-                              child: state is StickerSaveLoading
-                                  ? CircularProgressIndicator(
-                                color: kPinkColor,
-                              )
-                                  : Icon(
-                                Icons.save_alt_outlined,
-                                color: kPinkColor,
-                                size: 15.sp,
-                              )),
+                      builder: (context, state) => Center(
+                          child: state is StickerSaveLoading
+                              ? CircularProgressIndicator(
+                                  color: kPinkColor,
+                                )
+                              : Icon(
+                                  Icons.save_alt_outlined,
+                                  color: kPinkColor,
+                                  size: 15.sp,
+                                )),
                     ),
                   ),
                 ),
@@ -306,8 +307,10 @@ class MoreCategoriesErrorWidget extends StatelessWidget {
   const MoreCategoriesErrorWidget({
     super.key,
     required this.stickersCubit,
-    required this.error, required this.categoriesCubit,
+    required this.error,
+    required this.categoriesCubit,
   });
+
   final CategoriesCubit categoriesCubit;
   final StickersCubit stickersCubit;
   final String error;
@@ -329,7 +332,8 @@ class MoreCategoriesErrorWidget extends StatelessWidget {
                   categoriesCubit.getMoreCategories(
                       path: categoriesCubit.categoriesModel.links.next);
                 } else {
-                  if (categoriesCubit.newCategoriesModel.links.next.isNotEmpty) {
+                  if (categoriesCubit
+                      .newCategoriesModel.links.next.isNotEmpty) {
                     categoriesCubit.getMoreCategories(
                         path: categoriesCubit.newCategoriesModel.links.next);
                   }

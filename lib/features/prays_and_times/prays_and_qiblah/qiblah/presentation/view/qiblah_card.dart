@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -11,26 +12,24 @@ import 'dart:math' as Math;
 import '../../../../../../core/util/constant.dart';
 import '../../../presentation/view/prays_and_qiblah_page.dart';
 
-
 class QiblahCard extends StatefulWidget {
   const QiblahCard({
-    super.key,  });
+    super.key,
+  });
 
   @override
   State<QiblahCard> createState() => _QiblahCardState();
 }
 
 class _QiblahCardState extends State<QiblahCard> {
-
-
-
-
   @override
   void setState(fn) {
-    if(mounted) {
+    if (mounted) {
       super.setState(fn);
     }
   }
+
+  bool hasCompass = false;
   double heading = 0.0;
   final double qiblahLat = 21.422510;
   final double qiblahLon = 39.826174;
@@ -47,11 +46,14 @@ class _QiblahCardState extends State<QiblahCard> {
     double dLon = lon2Rad - lon1Rad;
 
     double y = Math.sin(dLon) * Math.cos(lat2Rad);
+
     double x = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
         Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
 
     double bearing = Math.atan2(y, x); // Bearing in radians
+
     bearing = bearing * (180 / 3.141592653589793); // Convert to degrees
+
     return (bearing + 360) % 360; // Normalize to 0-360 degrees
   }
 
@@ -60,19 +62,29 @@ class _QiblahCardState extends State<QiblahCard> {
   @override
   void initState() {
     super.initState();
-    _compassSubscription = FlutterCompass.events!.listen((event) {
-        FlutterCompass.events!.listen((event) {
-      if (!mounted) return;
+    FlutterCompass.events!.first.then((event) {
+      if (event.heading == null) {
+        // No compass available on this device
+        setState(() {
+          hasCompass = false;
+        });
+      } else {
+        // Device has a compass
+        setState(() {
+          hasCompass = true;
+        });
+
+        _compassSubscription = FlutterCompass.events!.listen((event) {
+          if (!mounted) return;
           setState(() {
             heading = event.heading ?? 0.0;
             qiblahBearing =
                 calculateBearing(qiblahLat, qiblahLon, userLat, userLon);
           });
-
-      });
+        });
+      }
     });
   }
-
 
   @override
   void dispose() {
@@ -88,60 +100,63 @@ class _QiblahCardState extends State<QiblahCard> {
         builder: (context, state) {
           QiblahCubit qiblahCubit = context.read<QiblahCubit>();
           return state is GetQiblahFailure
-              ?  QiblahErrorWidget(error: state.error,qiblahCubit: qiblahCubit):
-          state is GetQiblahLoading? PrayOrLocationLoadingWidget():
-           Container(
-            width: double.infinity,
-            height: 278.h,
-            decoration: const BoxDecoration(
-                color: Color(0xffD9D9D9)),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 20.0.w, vertical: 25.h),
-              child: false?Image.network( 'https://api.aladhan.com/v1/qibla/$latitude/$longitude/compass'):Column(
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.end,
-                    children: [
-                      Image.asset(
-                        'assets/icons/location.png',
-                        height: 40.h,
+              ? QiblahErrorWidget(error: state.error, qiblahCubit: qiblahCubit)
+              : state is GetQiblahLoading
+                  ? PrayOrLocationLoadingWidget()
+                  : Container(
+                      width: double.infinity,
+                      height: 278.h,
+                      decoration: const BoxDecoration(color: Color(0xffD9D9D9)),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 10.0.w, vertical: 5.h),
+                        child: false
+                            ? FancyShimmerImage(
+                                boxFit: BoxFit.fitHeight,
+                                imageUrl:
+                                    'https://api.aladhan.com/v1/qibla/$latitude/$longitude/compass',
+                              )
+                            : Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/location.png',
+                                        height: 40.h,
+                                      ),
+                                    ],
+                                  ),
+                                  Transform.rotate(
+                                    angle: ((qiblahBearing - heading) *
+                                        (3.141592653589793 / 180)),
+                                    // Convert degrees to radians
+                                    child: Column(
+                                      children: [
+                                        heading == null
+                                            ? CircularProgressIndicator(
+                                                color: kPrimaryColor,
+                                              ) // Loading indicator while heading is null
+                                            : Image.asset(
+                                                'assets/icons/locator.png',
+                                                height: 40,
+                                              ),
+                                        Container(
+                                          width: 5.w,
+                                          color: kPrimaryColor,
+                                          height: 60.h,
+                                        ),
+                                        Image.asset(
+                                          'assets/icons/kaba.png',
+                                          height: 40.h,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
-                    ],
-                  ),
-                  Transform.rotate(
-                    angle: ((qiblahBearing - heading) *
-                        (3.141592653589793 / 180)),
-                    // Convert degrees to radians
-                    child: Column(
-                      children: [
-                        heading == null
-                            ? CircularProgressIndicator(
-                          color: kPrimaryColor,
-                        ) // Loading indicator while heading is null
-                            : Image.asset(
-                          'assets/icons/locator.png',
-                          height: 40,
-                        ),
-                        Container(
-                          width: 5.w,
-                          color: kPrimaryColor,
-                          height: 60.h,
-                        ),
-                        Image.asset(
-
-                          'assets/icons/kaba.png',
-                          height: 40.h,
-                        ),
-
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+                    );
         },
       ),
     );
@@ -151,32 +166,38 @@ class _QiblahCardState extends State<QiblahCard> {
 class QiblahErrorWidget extends StatelessWidget {
   const QiblahErrorWidget({
     super.key,
-    required this.qiblahCubit, required this.error,
+    required this.qiblahCubit,
+    required this.error,
   });
 
   final QiblahCubit qiblahCubit;
   final String error;
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(error,style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.w600,color: Colors.white),),
+          Text(
+            error,
+            style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.white),
+          ),
           SizedBox(
             height: 20.h,
           ),
           ElevatedButton(
               style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(
-                      kPrimaryColor)),
+                  backgroundColor: WidgetStateProperty.all(kPrimaryColor)),
               onPressed: () {
                 qiblahCubit.getQiblah();
               },
               child: Text(
                 "إعادة المحاولة",
-                style: TextStyle(
-                    fontSize: 14.sp, color: Colors.white),
+                style: TextStyle(fontSize: 14.sp, color: Colors.white),
               ))
         ],
       ),

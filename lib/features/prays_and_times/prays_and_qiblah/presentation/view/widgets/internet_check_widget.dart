@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../core/util/constant.dart';
-import '../../manger/prays_cubit.dart';
 
 class InternetCheckWidget extends StatelessWidget {
   const InternetCheckWidget({
     super.key,
-    required this.praysCubit,
+     required this.text, required this.onTap,
   });
 
-  final PraysCubit praysCubit;
-
+  final String text;
+  final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -18,18 +17,18 @@ class InternetCheckWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "تأكد من اتصالك بالانترنت ثم حاول مرة اخرى",
+            text,
             style: TextStyle(
               fontSize: 14.sp,
             ),
           ),
           ElevatedButton(
               style: ButtonStyle(
+                  shape: WidgetStateProperty.all(
+                      const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
                   backgroundColor:
                   WidgetStateProperty.all(kPrimaryColor)),
-              onPressed: () {
-                praysCubit.getPrays();
-              },
+              onPressed: onTap,
               child: Text(
                 "اعادة المحاولة",
                 style: TextStyle(

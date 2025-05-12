@@ -17,7 +17,6 @@ class ReaderChooseDialog extends StatelessWidget {
         actions: [
           TextButton(
               onPressed: () {
-
                 Navigator.of(context).pop();
               },
               child: Text(
@@ -45,12 +44,16 @@ class ReaderChooseDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                "صوت المؤذن",
-                style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black),
+              Row(
+                children: [
+                  Text(
+                    "صوت المؤذن",
+                    style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black),
+                  ),
+                ],
               ),
               SizedBox(
                 height: 20.h,
@@ -97,7 +100,7 @@ class ReaderChooseDialog extends StatelessWidget {
                         },
                       );
                     },
-                    itemCount: 4),
+                    itemCount: 5),
               )
             ],
           ),

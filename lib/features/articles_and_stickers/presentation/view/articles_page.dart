@@ -31,7 +31,7 @@ class ArticlesAndStickersPage extends StatelessWidget {
                         ElevatedButton(
                             style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.all(kPrimaryColor)),
+                                    WidgetStateProperty.all(kPrimaryColor)),
                             onPressed: () {
                               context.read<ArticlesCubit>().getSections();
                               context

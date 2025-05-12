@@ -1,0 +1,2 @@
+D:/flutproject/norway_roznama_new_project/android/app/.cxx/Debug/4ds3g6r1/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/flutproject/norway_roznama_new_project/android/app/.cxx/Debug/4ds3g6r1/armeabi-v7a/CMakeFiles/rebuild_cache.dir

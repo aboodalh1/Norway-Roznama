@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/presentation/manger/prays_settings_cubit.dart';
 
 import '../../../../../../core/util/constant.dart';
@@ -25,6 +26,15 @@ class FaredaTile extends StatefulWidget {
 
 class _FaredaTileState extends State<FaredaTile> {
   @override
+  void initState() {
+    super.initState();
+    if (CacheHelper.getData(key: "fareeda_resides${widget.index}") != null) {
+      prayList[widget.index].time =
+          CacheHelper.getData(key: "fareeda_resides${widget.index}");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -36,7 +46,7 @@ class _FaredaTileState extends State<FaredaTile> {
               ListTile(
                 tileColor: null,
                 subtitle: Text(
-                  widget.praysCubit.stringPraysTimes[widget.index],
+                  widget.praysCubit.stringPraysTimes12Format[widget.index],
                   style: TextStyle(
                       color: const Color(0xff3D3D3D),
                       fontSize: 16.sp,
@@ -59,22 +69,24 @@ class _FaredaTileState extends State<FaredaTile> {
               ),
               IconButton(
                   onPressed: () {
-                    widget.praysSettingsCubit.faredaExpandationValue[widget.index]
+                    widget.praysSettingsCubit
+                            .faredaExpandationValue[widget.index]
                         ? widget.praysSettingsCubit.collapseFareda()
                         : widget.praysSettingsCubit.expandFareda(widget.index);
                   },
-                  icon: Icon(
-                      widget.praysSettingsCubit.faredaExpandationValue[widget.index]
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down))
+                  icon: Icon(widget.praysSettingsCubit
+                          .faredaExpandationValue[widget.index]
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down))
             ],
           ),
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            height: widget.praysSettingsCubit.faredaExpandationValue[widget.index]
-                ? 115.h
-                : 0,
+            height:
+                widget.praysSettingsCubit.faredaExpandationValue[widget.index]
+                    ? 115.h
+                    : 0,
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 20.h),
               color: const Color(0xffEEEEEE),
@@ -84,10 +96,11 @@ class _FaredaTileState extends State<FaredaTile> {
                     onTap: () {
                       widget.praysSettingsCubit.getAdhan();
                       showDialog(
-                        barrierDismissible: false,
+                          barrierDismissible: false,
                           context: context,
                           builder: (context) {
-                          widget.praysSettingsCubit.faredaReader = prayList[widget.index].reader;
+                            widget.praysSettingsCubit.faredaReader =
+                                prayList[widget.index].reader;
                             return FareedaReaderDialog(
                               widget: widget,
                               praysSettingsCubit: widget.praysSettingsCubit,
@@ -170,4 +183,3 @@ class _FaredaTileState extends State<FaredaTile> {
     );
   }
 }
-

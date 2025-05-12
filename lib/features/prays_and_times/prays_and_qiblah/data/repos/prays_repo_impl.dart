@@ -9,23 +9,25 @@ class PraysRepoImpl implements PraysRepo {
   PraysRepoImpl(this.dioHelper);
   DioHelper dioHelper;
   @override
-  Future<Either<Failure, Response>> getPrayersTimes() async{
-    try{
-;      var response = await dioHelper.getData(endPoint: 'api/v1/prayers',
+  Future<Either<Failure, Response>> getPrayersTimes(
+      {required double lat, required double long}) async {
+    try {
+      var response = await dioHelper.getData(
+        endPoint: 'api/v1/prayers/day',
         query: {
-        'latitude': 59.913263,
-        'longitude': 10.739122,
-        'date': DateFormat('yyyy-MM-dd').format(DateTime.now())
-        },);
+          'latitude': lat,
+          'longitude': long,
+          'date': DateFormat('yyyy-MM-dd').format(DateTime.now())
+        },
+      );
 
       return right(response);
-    }catch(e){
-      if(e is DioException){
-          return left(ServerFailure.fromDioError(e));
-             }
-        else{
-          return left(ServerFailure(e.toString()));
+    } catch (e) {
+      if (e is DioException) {
+        return left(ServerFailure.fromDioError(e));
+      } else {
+        return left(ServerFailure(e.toString()));
+      }
     }
-   }
   }
 }

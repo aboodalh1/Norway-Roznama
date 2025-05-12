@@ -18,12 +18,9 @@ class NawafelList extends StatelessWidget {
           const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            bool switchValue = false;
-            String reader = '';
             return NafelaTile(
                 index:index,
-                switchValue: switchValue,
-                reader: reader);
+                );
           },
           separatorBuilder: (context, index) {
             return Divider(

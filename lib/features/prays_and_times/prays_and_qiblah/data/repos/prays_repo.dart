@@ -6,6 +6,6 @@ import '../../../../../core/failure/failure.dart';
 
 abstract class PraysRepo{
 
-  Future<Either<Failure,Response>> getPrayersTimes();
+  Future<Either<Failure,Response>> getPrayersTimes({required double lat,required double long});
 
 }
