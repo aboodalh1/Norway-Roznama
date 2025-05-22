@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:jhijri/_src/_jHijri.dart';
 import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/features/monthly_timing/data/repos/monthly_timing_repo_impl.dart';
@@ -77,7 +78,8 @@ class MyApp extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   MonthlyTimingCubit(getIt.get<MonthlyTimingRepoImpl>())
-                    ..getMonthlyTiming(month: DateTime.now().month, year: DateTime.now().year)),
+                    ..getMonthlyTiming(month: HijriDate.now().month,
+                        year: HijriDate.now().year)),
           BlocProvider(create: (context) {
             return PraysCubit(getIt.get<PraysRepoImpl>());
           }),

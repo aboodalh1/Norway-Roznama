@@ -96,7 +96,8 @@ class StickersCubit extends Cubit<StickersState> {
 
   Future<String> saveNetworkImageLocally(String imageUrl, String fileName) async {
     emit(StickerSaveLoading());
-    try {
+    await Permission.manageExternalStorage.request();
+      try {
       if (await Permission.storage.isDenied) {
         await Permission.storage.request();
       }

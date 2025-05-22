@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 
 import '../../../../../../core/util/constant.dart';
 import '../../../../../../core/util/functions.dart';
@@ -55,7 +56,9 @@ class _PrayCardState extends State<PrayCard> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    widget.praysCubit.stringPraysTimes12Format[widget.index],
+                   Is24Format.is24TimeFormat?
+                   widget.praysCubit.stringPraysTimes24Format[widget.index]:
+                   widget.praysCubit.stringPraysTimes12Format[widget.index],
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 15.sp,

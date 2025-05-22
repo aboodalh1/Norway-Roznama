@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/util/constant.dart';
 import '../../data/model/prays_model.dart';
 import '../../data/repos/prays_repo.dart';
+
 part 'prays_state.dart';
 
 class PraysCubit extends Cubit<PraysState> {
@@ -77,13 +78,10 @@ class PraysCubit extends Cubit<PraysState> {
           prayList[i].isNotify = CacheHelper.getData(key: "pray_$i");
         }
       }
+      convertTo24HourFormat();
 
-      // Check if the mobile uses 24-hour format and convert if necessary
-      if (Is24Format.is24TimeFormat) convertTo24HourFormat();
-
-      // Update the datePraysTimes based on the converted prayer times
       DateTime now = DateTime.now(); // Get today's date
-      datePraysTimes = stringPraysTimes12Format.map((time) {
+      datePraysTimes = stringPraysTimes24Format.map((time) {
         List<String> parts = time.split(':');
         int hour = int.parse(parts[0]);
         int minute = int.parse(parts[1].substring(0, 2));
@@ -122,9 +120,14 @@ class PraysCubit extends Cubit<PraysState> {
     DateTime now = DateTime.now();
     DateTime? nearestTime;
     bool isFound = false;
+    print(datePraysTimes);
     for (int i = 0; i < datePraysTimes.length; i++) {
+      print(datePraysTimes[i]);
+      print(now);
       if (datePraysTimes[i].isAfter(now)) {
+        print("After: ${datePraysTimes[i]}");
         if (nearestTime == null || datePraysTimes[i].isBefore(nearestTime)) {
+          print(datePraysTimes[i]);
           nearestTime = datePraysTimes[i];
           neartestPrayIndex = i;
           isFound = true;
@@ -159,6 +162,7 @@ class PraysCubit extends Cubit<PraysState> {
   );
 
   bool isOslo = false;
+
   Future<void> getPrays() async {
     if (latitude == 0.0 || longitude == 0.0) {
       emit(LocationMissedState(message: "من فضلك قم بتحديد موقعك"));
@@ -252,22 +256,7 @@ class PraysCubit extends Cubit<PraysState> {
     if (value) {
       String? soundPath = adhanDownloaded[prayList[index].readerId];
       if (soundPath.isNotEmpty) {
-        switch (prayList[index].readerId) {
-          case 0:
-            soundPath = "alafasi";
-            break;
-          case 1:
-            soundPath = "yaser";
-            break;
-          case 2:
-            soundPath = "alhusari";
-            break;
-          case 3:
-            soundPath = "abd_albaset";
-            break;
-          default:
-            soundPath = null;
-        }
+        print(soundPath);
         LocalNotificationService.showDailySchduledNotification(
           index,
           praysName[index],

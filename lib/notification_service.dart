@@ -11,14 +11,16 @@ class LocalNotificationService {
   static final _notification = FlutterLocalNotificationsPlugin();
 
   static init() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
 
-    final initSettings = InitializationSettings(android: androidSettings, iOS: iosSettings);
+    final initSettings =
+        InitializationSettings(android: androidSettings, iOS: iosSettings);
     await _notification.initialize(initSettings);
 
     // Create the notification channel with sound
@@ -32,111 +34,48 @@ class LocalNotificationService {
 
     // Register the channel
     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(androidChannel);
 
     tz.initializeTimeZones();
   }
-
-  //basic Notification
-  static void showBasicNotification(
-    {required String soundPath }
-  ) async {
-          AndroidNotificationDetails android = AndroidNotificationDetails(
-      'id 1', 'basic notification',
-      importance: Importance.max,
-      sound: RawResourceAndroidNotificationSound(
-        "yaser"
-      ),
-      priority: Priority.high,
-
-    );
-    NotificationDetails details = NotificationDetails(
-      android: android,
-    );
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'تم تعيين منبه الصلاة بنجاح',
-      'اسم الصلاة',
-      details,
-      payload: "Payload Data",
-    );
-  }
-
-  // //showRepeatedNotification
-  // static void showRepeatedNotification() async {
-  //   const AndroidNotificationDetails android = AndroidNotificationDetails(
-  //     'id 2',
-  //     'repeated notification',
-  //     importance: Importance.max,
-  //     priority: Priority.high,
-  //   );
-  //   NotificationDetails details = const NotificationDetails(
-  //     android: android,
-  //   );
-  //   await flutterLocalNotificationsPlugin.periodicallyShow(
-  //     1,
-  //     'Reapated Notification',
-  //     'body',
-  //     RepeatInterval.daily,
-  //     details,
-  //     payload: "Payload Data",
-  //     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-  //   );
-  // }
-
-  // //showSchduledNotification
-  // static void showSchduledNotification() async {
-  //   const AndroidNotificationDetails android = AndroidNotificationDetails(
-  //     'schduled notification',
-  //     'id 3',
-  //     importance: Importance.max,
-  //     priority: Priority.high,
-  //   );
-  //   NotificationDetails details = const NotificationDetails(
-  //     android: android,
-  //   );
-  //   tz.initializeTimeZones();
-  //   log(tz.local.name);
-  //   log("Before ${tz.TZDateTime.now(tz.local).hour}");
-  //   final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
-  //   log(currentTimeZone);
-  //   tz.setLocalLocation(tz.getLocation(currentTimeZone));
-  //   log(tz.local.name);
-  //   log("After ${tz.TZDateTime.now(tz.local).hour}");
-  //   await flutterLocalNotificationsPlugin.zonedSchedule(
-  //     2,
-  //     'Schduled Notification',
-  //     'body',
-  //     tz.TZDateTime.now(tz.local).add(const Duration(seconds: 1)),
-  //     details,
-  //     payload: 'zonedSchedule',
-  //     uiLocalNotificationDateInterpretation:
-  //         UILocalNotificationDateInterpretation.absoluteTime,
-  //     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-  //   );
-  // }
 
   @pragma('vm:entry-point')
   static void showDailySchduledNotification(
       int id, String prayName, int hour, int minute,
       {String? soundPath}) async {
     AndroidNotificationDetails android = AndroidNotificationDetails(
-      'high_importance_channel',
-      'High Importance Notifications',
+      soundPath == "alafasi"
+          ? "alafasi_channel"
+          : soundPath == "alhusari"
+              ? "alafasi_channel"
+              : soundPath == "yaser"
+                  ? "alafasi_channel"
+                  : soundPath == "abd_albaset"
+                      ? "alafasi_channel"
+                      : 'High Importance alafasi_channel',
+      soundPath == "alafasi"
+          ? "alafasi"
+          : soundPath == "alhusari"
+              ? "alhusari"
+              : soundPath == "yaser"
+                  ? "yaser"
+                  : soundPath == "abd_albaset" 
+                      ? "abd_albaset"
+                      : 'High Importance Notifications1',
       importance: Importance.max,
       priority: Priority.high,
-      sound: soundPath!=null?
-      RawResourceAndroidNotificationSound(
-          soundPath):null,
+      sound: soundPath?.replaceFirst(".mp3", "") != null
+          ? UriAndroidNotificationSound(soundPath!.replaceFirst(".mp3", ""))
+          : null,
       icon: '@mipmap/ic_launcher',
-      playSound: true,
-
       enableVibration: true,
       enableLights: true,
     );
-
-    const DarwinNotificationDetails ios = DarwinNotificationDetails();
+  print(soundPath?.replaceFirst(".mp3", ""));
+    DarwinNotificationDetails ios =
+        DarwinNotificationDetails(sound: '$soundPath.mp3');
     NotificationDetails details =
         NotificationDetails(android: android, iOS: ios);
     tz.initializeTimeZones();
@@ -163,15 +102,6 @@ class LocalNotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
-
-  AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'daily_prayer_channel',
-    'Daily Prayer Notifications',
-    importance: Importance.max,
-    playSound: true,
-    sound: RawResourceAndroidNotificationSound('azan.mp3'),
-    showBadge: true,
-  );
 
   @pragma('vm:entry-point')
   static void showWeeklyScheduledNotification(int id, String prayName,

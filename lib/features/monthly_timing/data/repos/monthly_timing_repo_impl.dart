@@ -13,7 +13,7 @@ class MonthlyTimingRepoImpl implements MonthlyTimingRepo{
       var response = await dioHelper.getData(endPoint:  'api/v1/prayers/month',query: {
         'latitude': lat,
         'longitude': long,
-        'date': '$year-0$month'
+        'date': '$year-$month'
       });
       return right(response);
     }catch(e){

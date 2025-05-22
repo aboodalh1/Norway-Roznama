@@ -60,31 +60,49 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
 
   String savePath = ''; 
   AdhanRepo adhanRepo;
-  Future<String?> downloadAdhan(int index, String url, String fileName) async {
-    isDonwloading[index] = true;
+  Future<String?> downloadAdhan(int index,String url ) async {
     emit(AdhanDownloadLoading());
-    if (await Permission.storage.request().isGranted) {
-      try {
-        final directory = await getExternalStorageDirectory();
-  
-        savePath = "${directory!.path}/dd.mp3";
-        await MediaScanner.loadMedia(path: savePath);
-        await Directory("${directory.path}/Notifications")
-            .create(recursive: true);
-        adhanDownloaded[index] = savePath;
-        CacheHelper.saveData(key: 'adhan_downloaded', value: adhanDownloaded);
-        await Dio().download(url, savePath);
-        isDonwloading[index] = false;  
+    try {
+      // طلب صلاحية الوصول للتخزين
 
-        emit(AdhanDownloadSuccess(message: "تم تحميل الأذان بنجاح"));
-        return savePath;
-      } catch (e) {
-        isDonwloading[index] = false;
-        emit(AdhanDownloadFailure(error: 'فشل تحميل الاذان'));
-        return null;
+
+      // الوصول إلى مجلد التنزيلات
+      final Directory? downloadsDir = Directory('/storage/emulated/0/Download');
+
+      if (downloadsDir == null || !downloadsDir.existsSync()) {
+        throw Exception("Downloads folder not found");
       }
-    } else {
-      emit(AdhanDownloadFailure(error: "تم رفض اذن السماح بالتخزين في الجهاز"));
+
+      String name = index == 0
+          ? "alafasi"
+          : index == 1
+          ? "yaser"
+          : index == 2
+          ? "alhusari"
+          : index == 3
+          ? "abd_albaset"
+          : "default";
+
+      String savePath = "${downloadsDir.path}/$name.mp3";
+
+      // تحميل الملف
+      await Dio().download(url, savePath);
+
+      // إعلام النظام بوجود ملف وسائط جديد
+      await MediaScanner.loadMedia(path: savePath);
+
+      // تحديث الحالة أو الكاش
+      adhanDownloaded[index] = savePath;
+      CacheHelper.saveData(key: 'adhan_downloaded', value: adhanDownloaded);
+
+      isDonwloading[index] = false;
+
+      emit(AdhanDownloadSuccess(message: "تم تحميل الأذان بنجاح"));
+      return savePath;
+
+    } catch (e) {
+      isDonwloading[index] = false;
+      emit(AdhanDownloadFailure(error: 'فشل تحميل الأذان'));
       return null;
     }
   }

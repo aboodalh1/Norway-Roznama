@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/presentation/manger/prays_settings_cubit.dart';
 
+import '../../../../../../core/util/Is24Format.dart';
 import '../../../../../../core/util/constant.dart';
 import '../../../../prays_and_qiblah/presentation/manger/prays_cubit.dart';
 import 'fareeda_reader_dialog.dart';
@@ -46,6 +47,8 @@ class _FaredaTileState extends State<FaredaTile> {
               ListTile(
                 tileColor: null,
                 subtitle: Text(
+                  Is24Format.is24TimeFormat?
+                  widget.praysCubit.stringPraysTimes24Format[widget.index]:
                   widget.praysCubit.stringPraysTimes12Format[widget.index],
                   style: TextStyle(
                       color: const Color(0xff3D3D3D),

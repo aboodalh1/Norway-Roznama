@@ -48,54 +48,59 @@ class BarcodeScannerPage extends StatelessWidget {
                             color: kPrimaryColor,
                           ),
                         )
-                      : state is HalalFailure?
-                    Center(
-                    child: Text(state.error),
-                ):
-                    Column(
-                          children: [
-                            Center(
-                              child: Container(
-                                margin: EdgeInsets.symmetric(vertical: 20.h),
-                                height: 10.h,
-                                width: 90.w,
-                                decoration: BoxDecoration(
-                                    color: const Color(0xff535763),
-                                    borderRadius: BorderRadius.circular(50.r)),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 30.h,
-                            ),
-                            Text(
-                              'هذا المنتج:',
-                              style: TextStyle(
-                                  fontSize: 16.sp, fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              height: 10.h,
-                            ),
-                            Center(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 10.h),
-                                width: 226.w,
-                                height: 162.h,
-                                decoration: BoxDecoration(
-                                    color: const Color(0xffDFDFDF),
-                                    borderRadius: BorderRadius.circular(10.r)),
-                                child: halalCubit.isHalal != null
-                                    ? Image.asset(
-                                        halalCubit.isHalal!
-                                            ? 'assets/img/halal_confirm.png'
-                                            : 'assets/img/not_halal_confirm.png',
-                                        height: 166.h,
-                                        width: 152.w,
-                                      )
-                                    : const SizedBox(),
-                              ),
+                      : state is HalalFailure
+                          ? Center(
+                              child: Text(state.error),
                             )
-                          ],
-                        ),
+                          : Column(
+                              children: [
+                                Center(
+                                  child: Container(
+                                    margin:
+                                        EdgeInsets.symmetric(vertical: 20.h),
+                                    height: 10.h,
+                                    width: 90.w,
+                                    decoration: BoxDecoration(
+                                        color: const Color(0xff535763),
+                                        borderRadius:
+                                            BorderRadius.circular(50.r)),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30.h,
+                                ),
+                                Text(
+                                  'هذا المنتج:',
+                                  style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                SizedBox(
+                                  height: 10.h,
+                                ),
+                                Center(
+                                  child: Container(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 10.h),
+                                    width: 226.w,
+                                    height: 162.h,
+                                    decoration: BoxDecoration(
+                                        color: const Color(0xffDFDFDF),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r)),
+                                    child: halalCubit.isHalal != null
+                                        ? Image.asset(
+                                            halalCubit.isHalal!
+                                                ? 'assets/img/halal_confirm.png'
+                                                : 'assets/img/not_halal_confirm.png',
+                                            height: 166.h,
+                                            width: 152.w,
+                                          )
+                                        : const SizedBox(),
+                                  ),
+                                )
+                              ],
+                            ),
                 ),
               ),
             );

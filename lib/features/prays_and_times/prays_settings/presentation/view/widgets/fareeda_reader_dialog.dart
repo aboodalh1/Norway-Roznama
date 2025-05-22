@@ -163,11 +163,7 @@ class _FareedaReaderDialogState extends State<FareedaReaderDialog> {
                                                             .adhanModel
                                                             .data[index]
                                                             .url,
-                                                        widget 
-                                                            .praysSettingsCubit
-                                                            .adhanModel
-                                                            .data[index]
-                                                            .name);
+                                                        );
                                               } else {
                                                 if (widget.praysSettingsCubit
                                                     .isPlaying[index]) {

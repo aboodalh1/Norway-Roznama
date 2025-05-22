@@ -102,6 +102,11 @@ class StickersPage extends StatelessWidget {
                                                       .categoriesModel
                                                       .data[catIndex]
                                                       .name),
+                                                  Spacer(),
+                                                  // TextButton(onPressed: (){
+                                                  //
+                                                  // },
+                                                  //     child: Text("عرض المزيد"))
                                                 ],
                                               ),
                                               SizedBox(
