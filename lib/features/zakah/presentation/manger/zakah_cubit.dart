@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 
 part 'zakah_state.dart';
 
@@ -13,5 +14,14 @@ class ZakahCubit extends Cubit<ZakahState> {
     {'name': 'بقر', 'icon': 'assets/img/cow.png'},
     {'name': 'غنم', 'icon': 'assets/img/sheep.png'},
   ];
+
+  bool switchValue = false;
+
+  void changeSwitchValue(){
+    switchValue = !switchValue;
+    CacheHelper.saveData(key: "is_zakah_notification_on",
+        value: switchValue);
+    emit(ChangeSwitchValue());
+  }
 
 }

@@ -7,7 +7,6 @@ import 'package:norway_roznama_new_project/features/articles_and_stickers/data/m
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../../data/model/blogs_model.dart';
 import '../../../data/repos/stickers_repos/stickers_repo.dart';
 part 'stickers_state.dart';
 
@@ -16,9 +15,7 @@ class StickersCubit extends Cubit<StickersState> {
   StickersCubit(this.stickersRepo)
       : scrollController = ScrollController(),
         super(StickersInitial()) {
-    getStickers(catId: 2);
     scrollController.addListener(_onScrollStickers);
-    // stickersScrollController.addListener(_onScrollStickers);
   }
 
   PageController pageController = PageController();
@@ -36,26 +33,26 @@ class StickersCubit extends Cubit<StickersState> {
   ScrollController stickersScrollController = ScrollController();
 
   void _onScrollStickers() {
-    // if (stickersScrollController.position.pixels ==
-    //     stickersScrollController.position.maxScrollExtent) {
-    //   if (page == 1 && categoriesModel.links.next.isNotEmpty) {
-    //     getMoreStickers(path: categoriesModel.links.next);
-    //   } else {
-    //     if (newStickersModel.links.next.isNotEmpty) {
-    //       getMoreStickers(path: newStickersModel.links.next);
-    //     }
-    //   }
-    //   if (stickersScrollController.position.atEdge) {
-    //     if (stickersScrollController.position.pixels == 0) {
-    //       emit(StickersLoaded(false)); // At the top
-    //     } else {
-    //       emit(StickersLoaded(true)); // At the bottom
-    //     }
-    //   }
-    // else {
-    //     emit(StickersLoaded(false)); // More items to scroll
-    //   }
-    // }
+    if (stickersScrollController.position.pixels ==
+        stickersScrollController.position.maxScrollExtent) {
+      if (page == 1 && stickersModel.links1!.next!.isNotEmpty) {
+        getMoreStickers(path: stickersModel.links1!.next!);
+      } else {
+        if (newStickersModel.links1!.next!.isNotEmpty) {
+          getMoreStickers(path: newStickersModel.links1!.next!);
+        }
+      }
+      if (stickersScrollController.position.atEdge) {
+        if (stickersScrollController.position.pixels == 0) {
+          emit(StickersLoaded(false)); // At the top
+        } else {
+          emit(StickersLoaded(true)); // At the bottom
+        }
+      }
+    else {
+        emit(StickersLoaded(false)); // More items to scroll
+      }
+    }
   }
 
   @override
@@ -145,50 +142,35 @@ class StickersCubit extends Cubit<StickersState> {
     });
   }
 
-  StickersModel stickersModel = StickersModel(
-      data: [],
-      links: Links(first: '', last: '', prev: '', next: ''),
-      meta: Meta(
-          currentPage: 0,
-          from: 0,
-          lastPage: 0,
-          links: [],
-          path: '',
-          perPage: 0,
-          to: 0,
-          total: 0));
 
+
+ StickersModel stickersModel = StickersModel(
+   data: [],
+
+ );
   StickersModel newStickersModel = StickersModel(
-      data: [],
-      links: Links(first: 'first', last: 'last', prev: 'prev', next: 'next'),
-      meta: Meta(
-          currentPage: 0,
-          from: 0,
-          lastPage: 0,
-          links: [],
-          path: '',
-          perPage: 0,
-          to: 0,
-          total: 0));
+   data: [],
 
-  // Future<void> getMoreStickers({required String path}) async {
-  //   emit(MoreStickersLoadingState());
-  //   final result = await stickersRepo.getMoreStickers(path: path);
-  //   result.fold((failure) {
-  //     emit(MoreStickerErrorState(error: failure.errMessage));
-  //   }, (response) {
-  //     try {
-  //       newStickersModel = StickersModel.fromJson(response.data);
-  //       page = newStickersModel.meta.currentPage;
-  //       if (newStickersModel.data.isEmpty) {
-  //         emit(EndCategoriesState());
-  //       } else {
-  //         newStickersModel.data.addAll(newStickersModel.data);
-  //         emit(MoreStickerSuccessState());
-  //       }
-  //     } catch (e) {
-  //       emit(MoreStickerErrorState(error: "حدث خطأ ما، حاول مجدداً"));
-  //     }
-  //   });
-  // }
+ );
+
+  Future<void> getMoreStickers({required String path}) async {
+    emit(MoreStickersLoadingState());
+    final result = await stickersRepo.getMoreStickers(path: path);
+    result.fold((failure) {
+      emit(MoreStickerErrorState(error: failure.errMessage));
+    }, (response) {
+      try {
+        newStickersModel = StickersModel.fromJson(response.data);
+        page = newStickersModel.meta!.currentPage!;
+        if (newStickersModel.data!.isEmpty) {
+          emit(EndStickersState());
+        } else {
+          newStickersModel.data!.addAll(newStickersModel.data!);
+          emit(MoreStickerSuccessState());
+        }
+      } catch (e) {
+        emit(MoreStickerErrorState(error: "حدث خطأ ما، حاول مجدداً"));
+      }
+    });
+  }
 }

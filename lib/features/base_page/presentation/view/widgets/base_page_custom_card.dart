@@ -5,7 +5,7 @@ import 'package:norway_roznama_new_project/features/haj/manger/haj_cubit.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_and_qiblah/presentation/view/prays_and_qiblah_page.dart';
 import '../../../../../core/util/constant.dart';
 import '../../../../../core/util/functions.dart';
-import '../../../../articles_and_stickers/stickers/presentation/sticker_page.dart';
+import '../../../../articles_and_stickers/stickers/presentation/categories_page.dart';
 import '../../../../fasting/presentation/view/fasting_page.dart';
 import '../../../../halal_food/presentation/view/halal_page.dart';
 import '../../../../prays_and_times/prays_and_qiblah/presentation/manger/prays_cubit.dart';
@@ -46,7 +46,7 @@ class _CustomCardState extends State<CustomCard> {
     FastingPage(),
     PraysSettings(),
     HalalPage(),
-    StickersPage(),
+    CategoriesPage(),
   ];
 
   @override

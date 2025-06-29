@@ -50,6 +50,7 @@ class StickerErrorState extends StickersState {
   StickerErrorState({required this.error});
 
 }
+class EndStickersState extends StickersState {}
 class MoreStickersLoadingState extends StickersState {}
 class MoreStickerSuccessState extends StickersState {}
 

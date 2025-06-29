@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
-import 'package:norway_roznama_new_project/core/util/constant.dart';
+
+import 'package:norway_roznama_new_project/core/widgets/custom_switch.dart';
 import 'package:norway_roznama_new_project/notification_service.dart';
 
 class FastingDayTile extends StatefulWidget {
@@ -44,19 +45,18 @@ class _FastingDayTileState extends State<FastingDayTile> {
                 children: [
                   Directionality(
                     textDirection: TextDirection.rtl,
-                    child: Switch(
-                        activeTrackColor: kPinkColor,
-                        value: widget.index == 0
+                    child: CustomSwitch(
+                        switchValue: widget.index == 0
                             ? whiteDays
                             : widget.index == 1
-                                ? aashouraa
-                                : arafat,
-                        onChanged: (value) async {
+                            ? aashouraa
+                            : arafat,
+                        function: (value) async {
                           if (widget.index == 0) {
                             if (value) {
                               LocalNotificationService
                                   .scheduleMultipleDaysMonthlyNotification(
-                                      13, "الاأيام البيض", '', 12, 0, [12]);
+                                  13, "الاأيام البيض", '', 12, 0, [12]);
                               setState(() {
                                 whiteDays = true;
                               });
@@ -72,7 +72,7 @@ class _FastingDayTileState extends State<FastingDayTile> {
                             if (value) {
                               LocalNotificationService
                                   .scheduleDayOfSpecificMonthlyNotification(
-                                      8, "عاشوراء", '', 12, 0, 11, [9]);
+                                  8, "عاشوراء", '', 12, 0, 11, [9]);
                               setState(() {
                                 aashouraa = true;
                               });
@@ -85,23 +85,24 @@ class _FastingDayTileState extends State<FastingDayTile> {
                             CacheHelper.saveData(
                                 key: "aashouraa", value: aashouraa);
                           }
-                         else if  (widget.index == 2) {
+                          else if  (widget.index == 2) {
                             if (value) {
                               LocalNotificationService
                                   .scheduleDayOfSpecificMonthlyNotification(
-                                      8, "يوم عرفة", '', 12, 0, 11, [9]);
+                                  8, "يوم عرفة", '', 12, 0, 11, [9]);
                               setState(() {
                                 arafat = true;
                               });
                             }
                             else {
                               LocalNotificationService.cancelNotification(8);
-                            setState(() {
-                              arafat = false;
-                            });
-                          }
-                          CacheHelper.saveData(key: "arafat", value: arafat);
-                        }}),
+                              setState(() {
+                                arafat = false;
+                              });
+                            }
+                            CacheHelper.saveData(key: "arafat", value: arafat);
+                          }}
+                    )
                   ),
                   const Spacer(),
                   Column(

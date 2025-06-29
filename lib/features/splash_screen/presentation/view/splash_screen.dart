@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/util/api_service.dart';
-import 'package:norway_roznama_new_project/core/util/assets_loader.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/core/util/functions.dart';
 import 'package:norway_roznama_new_project/features/home/presentation/view/home_page.dart';
@@ -68,9 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _firebaseMessaging.requestPermission();
 
-    // Subscribe to the topic "all-clients"
     subscribeToTopic();
-    // Listen to foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
         // Handle the foreground notification
@@ -86,7 +83,6 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     });
 
-    // Handle background and terminated state messages
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     printToken();
 
@@ -109,26 +105,10 @@ class _SplashScreenState extends State<SplashScreen> {
             height: double.infinity,
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xffE7FFE0),
-                    Color(0xff4E903C),
-                  ]),
+             color:Colors.white
             ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(right: 77.w, left: 77.w, top: 285.h),
-                child: Image.asset(AssetsLoader.logo),
-              ),
-              Spacer(),
-              Image.asset(AssetsLoader.splashScreen),
-            ],
-          )
+          Center(child: Image.asset("assets/img/islamsk mojammaa -1.png",height: 300.h,width: 300.w,))
         ],
       ),
     );

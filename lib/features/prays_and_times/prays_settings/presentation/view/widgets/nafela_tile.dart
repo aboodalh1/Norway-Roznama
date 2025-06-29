@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' as Intl;
 import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
+import 'package:norway_roznama_new_project/core/widgets/custom_switch.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/presentation/view/widgets/reader_choose_dialog.dart';
 import 'package:norway_roznama_new_project/notification_service.dart';
 
@@ -86,10 +87,9 @@ class _NafelaTileState extends State<NafelaTile> {
                       children: [
                         Directionality(
                           textDirection: TextDirection.rtl,
-                          child: Switch(
-                              activeTrackColor: kPinkColor,
-                              value: nawafelList[widget.index].isNotify,
-                              onChanged: (value) {
+                          child: CustomSwitch(
+                              switchValue: nawafelList[widget.index].isNotify,
+                              function: (value) {
                                 setState(() {
                                   nawafelList[widget.index].isNotify = value;
                                 });
@@ -104,7 +104,7 @@ class _NafelaTileState extends State<NafelaTile> {
                                 }
                                 CacheHelper.saveData(key: "nafila_${widget.index}", value: value);
                               }
-                              ),
+                          )
                         ),
                         const Spacer(),
                         Column(

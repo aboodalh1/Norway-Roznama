@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/util/constant.dart';
+import 'package:norway_roznama_new_project/core/util/functions.dart';
 import 'package:norway_roznama_new_project/core/util/service_locator.dart';
 import 'package:norway_roznama_new_project/core/widgets/custom_snack_bar.dart';
 import 'package:norway_roznama_new_project/features/articles_and_stickers/data/repos/stickers_repos/stickers_repo_impl.dart';
@@ -10,13 +11,14 @@ import 'package:norway_roznama_new_project/features/articles_and_stickers/sticke
 import 'package:norway_roznama_new_project/features/articles_and_stickers/stickers/presentation/sticker_dialog.dart';
 import 'package:norway_roznama_new_project/features/articles_and_stickers/stickers/presentation/stickers_error_body.dart';
 import 'package:norway_roznama_new_project/features/articles_and_stickers/stickers/presentation/stickers_loading_body.dart';
+import 'package:norway_roznama_new_project/features/articles_and_stickers/stickers/presentation/stickers_page.dart';
 
 import '../../../../core/widgets/end_of_content_widget.dart';
 import '../../../../core/widgets/loading_more_indicator.dart';
 import '../manger/stickers/stickers_cubit.dart';
 
-class StickersPage extends StatelessWidget {
-  const StickersPage({super.key});
+class CategoriesPage extends StatelessWidget {
+  const CategoriesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,114 +71,125 @@ class StickersPage extends StatelessWidget {
                   body: catState is CategoriesLoadingState
                       ? StickerLoadingBody()
                       : catState is CategoriesErrorState
-                          ? StickersErrorBody(error: catState.error)
-                          : Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 29, horizontal: 15.0),
-                              child: SingleChildScrollView(
-                                controller: stickersCubit.scrollController,
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      child: ListView.separated(
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        shrinkWrap: true,
-                                        separatorBuilder: (context, catIndex) {
-                                          return Divider(
-                                            thickness: 0.7,
-                                            height: 40.h,
-                                            color: Color(0xffAEAEAE),
-                                          );
-                                        },
-                                        itemCount: categoriesCubit
-                                            .categoriesModel.data.length,
-                                        itemBuilder: (context, catIndex) =>
-                                            Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                              Row(
-                                                children: [
-                                                  Text(categoriesCubit
-                                                      .categoriesModel
-                                                      .data[catIndex]
-                                                      .name),
-                                                  Spacer(),
-                                                  // TextButton(onPressed: (){
-                                                  //
-                                                  // },
-                                                  //     child: Text("عرض المزيد"))
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                height: 10.h,
-                                              ),
-                                              Stack(
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 83.h,
-                                                        child:
-                                                            ListView.separated(
-                                                                scrollDirection:
-                                                                    Axis
-                                                                        .horizontal,
-                                                                shrinkWrap:
-                                                                    true,
-                                                                itemBuilder:
-                                                                    (context,
-                                                                        index) {
-                                                                  return StickerCard(
-                                                                    categoriesCubit:
-                                                                        categoriesCubit,
-                                                                    index:
-                                                                        index,
-                                                                    stickersCubit:
-                                                                        stickersCubit,
-                                                                    catIndex:
-                                                                        catIndex,
-                                                                  );
-                                                                },
-                                                                separatorBuilder:
-                                                                    (context,
-                                                                        index) {
-                                                                  return SizedBox(
-                                                                    width:
-                                                                        7.85.w,
-                                                                  );
-                                                                },
-                                                                itemCount: categoriesCubit
-                                                                    .categoriesModel
-                                                                    .data[
-                                                                        catIndex]
-                                                                    .stickers
-                                                                    .length),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              )
-                                            ]),
-                                      ),
-                                    ),
-                                    if (catState is MoreCategoriesLoadingState)
-                                      LoadingMoreIndicator(),
-                                    if (catState is MoreCategoriesErrorState)
-                                      MoreCategoriesErrorWidget(
-                                          categoriesCubit: categoriesCubit,
-                                          error: catState.error,
-                                          stickersCubit: stickersCubit),
-                                    if (categoriesCubit
-                                        .newCategoriesModel.links.next.isEmpty)
-                                      EndOfContentWidget(
-                                        text: " انتهت الملصقات المتوفرة",
-                                      ),
-                                  ],
-                                ),
-                              ),
+                      ? StickersErrorBody(error: catState.error)
+                      : Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: 29, horizontal: 15.0),
+                    child: SingleChildScrollView(
+                      controller: stickersCubit.scrollController,
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            child: ListView.separated(
+                              physics:
+                              const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              separatorBuilder: (context, catIndex) {
+                                return Divider(
+                                  thickness: 0.7,
+                                  height: 40.h,
+                                  color: Color(0xffAEAEAE),
+                                );
+                              },
+                              itemCount: categoriesCubit
+                                  .categoriesModel.data.length,
+                              itemBuilder: (context, catIndex) =>
+                                  Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(categoriesCubit
+                                                .categoriesModel
+                                                .data[catIndex]
+                                                .name),
+                                            Spacer(),
+                                            TextButton(
+                                                onPressed: () {
+                                                  navigateTo(
+                                                      context,
+                                                      StickersPage(
+                                                          catIndex:
+                                                          categoriesCubit
+                                                              .categoriesModel
+                                                              .data[catIndex].id,
+                                                          catName:
+                                                          categoriesCubit
+                                                              .categoriesModel
+                                                              .data[catIndex].name));
+                                                },
+                                                child: Text("عرض المزيد"))
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 10.h,
+                                        ),
+                                        Stack(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                SizedBox(
+                                                  height: 83.h,
+                                                  child:
+                                                  ListView.separated(
+                                                      scrollDirection:
+                                                      Axis
+                                                          .horizontal,
+                                                      shrinkWrap:
+                                                      true,
+                                                      itemBuilder:
+                                                          (context,
+                                                          index) {
+                                                        return StickerCard(
+                                                          categoriesCubit:
+                                                          categoriesCubit,
+                                                          index:
+                                                          index,
+                                                          stickersCubit:
+                                                          stickersCubit,
+                                                          catIndex:
+                                                          catIndex,
+                                                        );
+                                                      },
+                                                      separatorBuilder:
+                                                          (context,
+                                                          index) {
+                                                        return SizedBox(
+                                                          width:
+                                                          7.85.w,
+                                                        );
+                                                      },
+                                                      itemCount: categoriesCubit
+                                                          .categoriesModel
+                                                          .data[
+                                                      catIndex]
+                                                          .stickers
+                                                          .length),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        )
+                                      ]),
                             ),
+                          ),
+                          if (catState is MoreCategoriesLoadingState)
+                            LoadingMoreIndicator(),
+                          if (catState is MoreCategoriesErrorState)
+                            MoreCategoriesErrorWidget(
+                                categoriesCubit: categoriesCubit,
+                                error: catState.error,
+                                stickersCubit: stickersCubit),
+                          if (categoriesCubit
+                              .newCategoriesModel.links.next.isEmpty)
+                            EndOfContentWidget(
+                              text: " انتهت الملصقات المتوفرة",
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
@@ -186,8 +199,6 @@ class StickersPage extends StatelessWidget {
     );
   }
 }
-
-
 
 class StickerCard extends StatelessWidget {
   const StickerCard({
@@ -261,10 +272,10 @@ class StickerCard extends StatelessWidget {
                     ),
                     child: Center(
                         child: Icon(
-                      Icons.share,
-                      color: kPinkColor,
-                      size: 15.sp,
-                    )),
+                          Icons.share,
+                          color: kPinkColor,
+                          size: 15.sp,
+                        )),
                   ),
                 ),
               ),
@@ -289,16 +300,17 @@ class StickerCard extends StatelessWidget {
                       color: Colors.white,
                     ),
                     child: BlocBuilder<StickersCubit, StickersState>(
-                      builder: (context, state) => Center(
-                          child: state is StickerSaveLoading
-                              ? CircularProgressIndicator(
-                                  color: kPinkColor,
-                                )
-                              : Icon(
-                                  Icons.save_alt_outlined,
-                                  color: kPinkColor,
-                                  size: 15.sp,
-                                )),
+                      builder: (context, state) =>
+                          Center(
+                              child: state is StickerSaveLoading
+                                  ? CircularProgressIndicator(
+                                color: kPinkColor,
+                              )
+                                  : Icon(
+                                Icons.save_alt_outlined,
+                                color: kPinkColor,
+                                size: 15.sp,
+                              )),
                     ),
                   ),
                 ),

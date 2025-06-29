@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
+import 'package:norway_roznama_new_project/core/widgets/custom_switch.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/presentation/manger/prays_settings_cubit.dart';
 
 import '../../../../../../core/util/Is24Format.dart';
@@ -62,13 +63,12 @@ class _FaredaTileState extends State<FaredaTile> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600),
                 ),
-                trailing: Switch(
-                  activeTrackColor: kPinkColor,
-                  value: prayList[widget.index].isNotify,
-                  onChanged: (value) {
+                trailing: CustomSwitch(
+                  switchValue: prayList[widget.index].isNotify,
+                  function: (value) {
                     widget.praysCubit.updateFaredaNotify(value, widget.index);
                   },
-                ),
+                )
               ),
               IconButton(
                   onPressed: () {

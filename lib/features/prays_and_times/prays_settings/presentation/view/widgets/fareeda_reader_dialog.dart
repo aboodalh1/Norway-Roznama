@@ -151,76 +151,47 @@ class _FareedaReaderDialogState extends State<FareedaReaderDialog> {
                                         SizedBox(
                                           width: 10.w,
                                         ),
-                                       if(index!=4) GestureDetector(
-                                            onTap: () {
-                                              if (adhanDownloaded[index] ==
-                                                  'false') {
-                                                widget.praysSettingsCubit
-                                                    .downloadAdhan(
-                                                        index,
-                                                        widget 
-                                                            .praysSettingsCubit
-                                                            .adhanModel
-                                                            .data[index]
-                                                            .url,
-                                                        );
-                                              } else {
-                                                if (widget.praysSettingsCubit
-                                                    .isPlaying[index]) {
-                                                  setState(() {
+                                        if (index != 4)
+                                          GestureDetector(
+                                              onTap: () {
+                                                  if (widget.praysSettingsCubit
+                                                      .isPlaying[index]) {
+                                                    setState(() {
+                                                      widget.praysSettingsCubit
+                                                              .isPlaying[
+                                                          index] = false;
+                                                    });
                                                     widget.praysSettingsCubit
-                                                            .isPlaying[index] =
-                                                        false;
-                                                  });
-                                                  widget
-                                                      .praysSettingsCubit.player
-                                                      .stop();
-                                                } else {
-                                                  for (int i = 0;
-                                                      i <
-                                                          widget
-                                                              .praysSettingsCubit
-                                                              .isPlaying
-                                                              .length;
-                                                      i++) {
+                                                        .player
+                                                        .stop();
+                                                  } else {
+                                                    for (int i = 0;
+                                                        i <
+                                                            widget
+                                                                .praysSettingsCubit
+                                                                .isPlaying
+                                                                .length;
+                                                        i++) {
+                                                      widget.praysSettingsCubit
+                                                          .isPlaying[i] = false;
+                                                    }
+                                                    setState(() {
+                                                      widget.praysSettingsCubit
+                                                              .isPlaying[
+                                                          index] = true;
+                                                    });
                                                     widget.praysSettingsCubit
-                                                        .isPlaying[i] = false;
+                                                        .playLocalAdhan(index);
                                                   }
-                                                  setState(() {
-                                                    widget.praysSettingsCubit
-                                                            .isPlaying[index] =
-                                                        true;
-                                                  });
-                                                  widget.praysSettingsCubit
-                                                      .playLocalAdhan(index);
-                                                }
-                                              }
-                                            },
-                                            child: widget.praysSettingsCubit
-                                                    .isDonwloading[index]
-                                                ? SizedBox(
-                                                    width: 18.w,
-                                                    height: 18.h,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      color: kPinkColor,
-                                                      strokeWidth: 1.8,
-                                                    ))
-                                                : Icon(
-                                                    adhanDownloaded[index] ==
-                                                            'false'
-                                                        ? Icons
-                                                            .save_alt_outlined
-                                                        : widget.praysSettingsCubit
-                                                                    .isPlaying[
-                                                                index]
-                                                            ? Icons
-                                                                .pause_circle_outline
-                                                            : Icons
-                                                                .play_arrow_outlined,
-                                                    size: 28.sp,
-                                                    color: kPinkColor,
-                                                  )),
+                                                },
+                                              child: Icon(
+                                                widget.praysSettingsCubit
+                                                        .isPlaying[index]
+                                                    ? Icons.pause_circle_outline
+                                                    : Icons.play_arrow_outlined,
+                                                size: 28.sp,
+                                                color: kPinkColor,
+                                              )),
                                       ],
                                     ),
                                   );

@@ -8,8 +8,6 @@ import 'package:media_scanner/media_scanner.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/model/adhan_model.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/repo/adhan_repo.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/util/constant.dart';
 
 part 'prays_settings_state.dart';
@@ -23,11 +21,9 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
     if (CacheHelper.getData(key: 'adhan_list') != null) {
       adhanList = CacheHelper.getData(key: 'adhan_list');
     }
-    for(int i=0; i<prayList.length;i++){
-      if(  CacheHelper.getData(
-          key: "pray_reader$i")!=null){
-        prayList[i].readerId =CacheHelper.getData(
-            key: "pray_reader$i");
+    for (int i = 0; i < prayList.length; i++) {
+      if (CacheHelper.getData(key: "pray_reader$i") != null) {
+        prayList[i].readerId = CacheHelper.getData(key: "pray_reader$i");
       }
       prayList[i].reader = readers[prayList[i].readerId];
     }
@@ -36,10 +32,11 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
       adhanDownloaded = CacheHelper.getData(key: 'adhan_downloaded');
     } else {
       adhanDownloaded = [
-        'false',
-        'false',
-        'false',
-        'false',
+        'assets/sounds/alafasi.mp3',
+        'assets/sounds/yaser.mp3',
+        'assets/sounds/alhusari.mp3',
+        'assets/sounds/abd_albaset.mp3',
+        'false'
       ];
       CacheHelper.saveData(key: 'adhan_downloaded', value: adhanDownloaded);
     }
@@ -58,13 +55,13 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
     false,
   ];
 
-  String savePath = ''; 
+  String savePath = '';
   AdhanRepo adhanRepo;
-  Future<String?> downloadAdhan(int index,String url ) async {
+
+  Future<String?> downloadAdhan(int index, String url) async {
     emit(AdhanDownloadLoading());
     try {
       // طلب صلاحية الوصول للتخزين
-
 
       // الوصول إلى مجلد التنزيلات
       final Directory? downloadsDir = Directory('/storage/emulated/0/Download');
@@ -76,14 +73,14 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
       String name = index == 0
           ? "alafasi"
           : index == 1
-          ? "yaser"
-          : index == 2
-          ? "alhusari"
-          : index == 3
-          ? "abd_albaset"
-          : "default";
+              ? "yaser"
+              : index == 2
+                  ? "alhusari"
+                  : index == 3
+                      ? "abd_albaset"
+                      : "default";
 
-      String savePath = "${downloadsDir.path}/$name.mp3";
+      String savePath = "assets/sounds/$name.mp3";
 
       // تحميل الملف
       await Dio().download(url, savePath);
@@ -99,7 +96,6 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
 
       emit(AdhanDownloadSuccess(message: "تم تحميل الأذان بنجاح"));
       return savePath;
-
     } catch (e) {
       isDonwloading[index] = false;
       emit(AdhanDownloadFailure(error: 'فشل تحميل الأذان'));
@@ -125,8 +121,18 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
   AdhanModel adhanModel = AdhanModel(success: false, message: '', data: []);
 
   final player = AudioPlayer();
+
   void playLocalAdhan(int index) async {
-    await player.play(DeviceFileSource(adhanDownloaded[index]));
+    String selectedAzan = index == 0
+        ? "alafasi"
+        : index == 1
+            ? "yaser"
+            : index == 2
+                ? "alhusari"
+                : index == 3
+                    ? "abd_albaset"
+                    : "default";
+    await player.play(AssetSource("sounds/$selectedAzan.mp3"));
   }
 
   Future<void> getAdhan() async {
@@ -157,6 +163,7 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
 
   void changeReader(String value) {
     faredaReader = value;
+    print(value);
     emit(ChangeReaderState());
   }
 
@@ -169,9 +176,12 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
             ? 1
             : faredaReader == "محمود الحصري"
                 ? 2
-                : faredaReader == "عبدالباسط عبدالصمد"?3:4;
+                : faredaReader == "عبدالباسط عبدالصمد"
+                    ? 3
+                    : 4;
     CacheHelper.saveData(
         key: "pray_reader$index", value: prayList[index].readerId);
+    print(adhanDownloaded[prayList[index].readerId]);
     emit(ChangeReaderState());
   }
 

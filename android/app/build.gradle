@@ -8,6 +8,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+
+
 android {
     namespace = "com.example.norway_roznama_new_project"
     compileSdk = flutter.compileSdkVersion

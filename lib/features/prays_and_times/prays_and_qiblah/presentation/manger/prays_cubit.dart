@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:norway_roznama_new_project/alarm_helper.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/util/constant.dart';
+import '../../../../../main.dart';
 import '../../data/model/prays_model.dart';
 import '../../data/repos/prays_repo.dart';
-
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 part 'prays_state.dart';
 
 class PraysCubit extends Cubit<PraysState> {
@@ -180,6 +183,7 @@ class PraysCubit extends Cubit<PraysState> {
               emit(GetPrayersTimesError(error: "حدث خطأ ما! اعد المحاولة")),
           (response) {
             if (response.data['success'] == false) {
+              print(response.data);
               emit(GetPrayersTimesError(error: "حدث خطأ ما، حاول مجدداً"));
               return;
             }
@@ -191,6 +195,7 @@ class PraysCubit extends Cubit<PraysState> {
         );
       },
       (response) async {
+        print(response.data);
         if (response.data['success'] == false) {
           if (response.data['message'].contains("Validation")) {
             var result = await prayersRepo.getPrayersTimes(
@@ -256,14 +261,40 @@ class PraysCubit extends Cubit<PraysState> {
     if (value) {
       String? soundPath = adhanDownloaded[prayList[index].readerId];
       if (soundPath.isNotEmpty) {
+        tz.initializeTimeZones();
+        String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+        tz.setLocalLocation(tz.getLocation(currentTimeZone));
+        var currentTime = tz.TZDateTime.now(tz.local);
+
+        var scheduleTime = tz.TZDateTime(
+            tz.local,
+            currentTime.year,
+            currentTime.month,
+            currentTime.day,
+            datePraysTimes[index].hour,
+            datePraysTimes[index].minute);
+
+        // If the scheduled time is in the past, schedule for the next day.
+        if (scheduleTime.isBefore(currentTime)) {
+          scheduleTime = scheduleTime.add(const Duration(days: 1));
+        }
         print(soundPath);
-        LocalNotificationService.showDailySchduledNotification(
-          index,
-          praysName[index],
-          soundPath: soundPath, // Extract the file name without extension
-          datePraysTimes[index].hour,
-          datePraysTimes[index].minute,
+        await AlarmHelper.setPrayerAlarm(
+          id: index,
+          prayerName: praysName[index],
+          prayerTime: scheduleTime,
+          customSoundPath: soundPath,
         );
+
+        // LocalNotificationService.showDailySchduledNotification(
+        //   index,
+        //   praysName[index],
+        //   soundPath: soundPath, // Extract the file name without extension
+        //   datePraysTimes[index].hour,
+        //   datePraysTimes[index].minute,
+        // );
+
+        // await AlarmHelper.setCustomAlarm(hour: datePraysTimes[index].hour,minute: datePraysTimes[index].minute, title: 'Salat', message: "Salat Duhr");
         LocalNotificationService.showDailySchduledNotification(
           index + 400,
           "إقامة " + praysName[index],
@@ -277,7 +308,7 @@ class PraysCubit extends Cubit<PraysState> {
         );
         CacheHelper.saveData(key: 'pray_$index', value: value);
       } else {}
-    }
+    } else {}
     emit(ChangeFaredaState());
   }
 

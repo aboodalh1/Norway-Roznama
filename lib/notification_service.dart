@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -23,7 +24,6 @@ class LocalNotificationService {
         InitializationSettings(android: androidSettings, iOS: iosSettings);
     await _notification.initialize(initSettings);
 
-    // Create the notification channel with sound
     final androidChannel = AndroidNotificationChannel(
       'high_importance_channel',
       'High Importance Notifications',
@@ -45,6 +45,10 @@ class LocalNotificationService {
   static void showDailySchduledNotification(
       int id, String prayName, int hour, int minute,
       {String? soundPath}) async {
+    if (CacheHelper.getData(key: "is_muted") != null &&
+        CacheHelper.getData(key: "is_muted")) {
+      return;
+    }
     AndroidNotificationDetails android = AndroidNotificationDetails(
       soundPath == "alafasi"
           ? "alafasi_channel"
@@ -61,19 +65,16 @@ class LocalNotificationService {
               ? "alhusari"
               : soundPath == "yaser"
                   ? "yaser"
-                  : soundPath == "abd_albaset" 
+                  : soundPath == "abd_albaset"
                       ? "abd_albaset"
                       : 'High Importance Notifications1',
       importance: Importance.max,
       priority: Priority.high,
-      sound: soundPath?.replaceFirst(".mp3", "") != null
-          ? UriAndroidNotificationSound(soundPath!.replaceFirst(".mp3", ""))
-          : null,
+      sound: RawResourceAndroidNotificationSound("alafasi"),
       icon: '@mipmap/ic_launcher',
       enableVibration: true,
       enableLights: true,
     );
-  print(soundPath?.replaceFirst(".mp3", ""));
     DarwinNotificationDetails ios =
         DarwinNotificationDetails(sound: '$soundPath.mp3');
     NotificationDetails details =
@@ -104,8 +105,63 @@ class LocalNotificationService {
   }
 
   @pragma('vm:entry-point')
+  static void showScheduledNotificationByDate(
+      {required int id,
+      required String prayName,
+      required int hour,
+      required int minute,
+      required int month,
+      required int year,
+      required int day,
+      String? soundPath}) async {
+    if (CacheHelper.getData(key: "is_zakah_notification_on")!=null &&
+        CacheHelper.getData(key: "is_zakah_notification_on")) {
+      return;
+    }
+    AndroidNotificationDetails android = AndroidNotificationDetails(
+      'High Importance alafasi_channel',
+      'High Importance Notifications1',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      enableVibration: true,
+      enableLights: true,
+    );
+    DarwinNotificationDetails ios =
+        DarwinNotificationDetails(sound: '$soundPath.mp3');
+    NotificationDetails details =
+        NotificationDetails(android: android, iOS: ios);
+    tz.initializeTimeZones();
+    String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    var currentTime = tz.TZDateTime.now(tz.local);
+
+    var scheduleTime = tz.TZDateTime(tz.local, year, month, day, hour, minute);
+
+    if (scheduleTime.isBefore(currentTime)) {
+      scheduleTime = scheduleTime.add(const Duration(days: 1));
+    }
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      prayName,
+      prayName,
+      scheduleTime,
+      details,
+      payload: 'zonedSchedule',
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  @pragma('vm:entry-point')
   static void showWeeklyScheduledNotification(int id, String prayName,
       String soundPath, int hour, int minute, int dayOfWeek) async {
+    if (CacheHelper.getData(key: "is_muted") != null &&
+        CacheHelper.getData(key: "is_muted")) {
+      return;
+    }
     AndroidNotificationDetails android = AndroidNotificationDetails(
       'weekly scheduled $id',
       'id $id',
@@ -156,6 +212,10 @@ class LocalNotificationService {
   @pragma('vm:entry-point')
   static void showMonthlyScheduledNotification(int id, String prayName,
       String soundPath, int hour, int minute, int dayOfMonth) async {
+    if (CacheHelper.getData(key: "is_muted") != null &&
+        CacheHelper.getData(key: "is_muted")) {
+      return;
+    }
     AndroidNotificationDetails android = AndroidNotificationDetails(
       'weekly scheduled $id',
       'id $id',
@@ -206,6 +266,10 @@ class LocalNotificationService {
   @pragma('vm:entry-point')
   static void scheduleMultipleDaysMonthlyNotification(int id, String prayName,
       String soundPath, int hour, int minute, List<int> daysOfMonth) async {
+    if (CacheHelper.getData(key: "is_muted") != null &&
+        CacheHelper.getData(key: "is_muted")) {
+      return;
+    }
     for (int i = 0; i < daysOfMonth.length; i++) {
       AndroidNotificationDetails android = AndroidNotificationDetails(
         'monthly scheduled ${id + i}',
@@ -262,6 +326,10 @@ class LocalNotificationService {
       int month,
       List<int> daysOfMonth) async {
     for (int i = 0; i < daysOfMonth.length; i++) {
+      if (CacheHelper.getData(key: "is_muted") != null &&
+          CacheHelper.getData(key: "is_muted")) {
+        return;
+      }
       AndroidNotificationDetails android = AndroidNotificationDetails(
         'monthly scheduled ${id + i}',
         'id ${id + i}',
@@ -315,16 +383,3 @@ class LocalNotificationService {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 }
-
-// Future<void> openBatteryOptimizationSettings() async {
-//   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-//   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-
-//   if (androidInfo.version.sdkInt >= 23) {
-//     AndroidIntent intent = AndroidIntent(
-//       action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
-//       package: 'your.package.name',
-//     );
-//     await intent.launch();
-// }
-// /}

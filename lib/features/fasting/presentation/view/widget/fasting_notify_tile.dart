@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/core/util/constant.dart';
+import 'package:norway_roznama_new_project/core/widgets/custom_switch.dart';
 
 
 class FastingNotifyTile extends StatefulWidget {
@@ -46,10 +47,9 @@ class _FastingNotifyTileState extends State<FastingNotifyTile> {
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500),
                 ),
-                trailing: Switch(
-                  activeTrackColor: kPinkColor,
-                  value: isNotify,
-                  onChanged: (value) {
+                trailing: CustomSwitch(
+                  switchValue: isNotify,
+                  function: (value) {
                     setState(() {
                       isNotify = value;
                       if (isNotify) {
@@ -64,7 +64,7 @@ class _FastingNotifyTileState extends State<FastingNotifyTile> {
                     CacheHelper.saveData(key: 'is_iftar', value: isIftar);
                     CacheHelper.saveData(key: 'is_sohor', value: isSohor);
                   },
-                ),
+                )
               ),
               IconButton(
                   onPressed: () {
@@ -100,10 +100,9 @@ class _FastingNotifyTileState extends State<FastingNotifyTile> {
                         const Spacer(),
                         SizedBox(
                           height: 40.h,
-                          child: Switch(
-                            activeTrackColor: kPinkColor,
-                            value: isIftar,
-                            onChanged: (value) {
+                          child: CustomSwitch(
+                            switchValue: isIftar,
+                            function: (value) {
                               setState(() {
                                 isIftar = value;
                                 if (isIftar) {
@@ -115,8 +114,8 @@ class _FastingNotifyTileState extends State<FastingNotifyTile> {
                               });
                               CacheHelper.saveData(key: 'is_iftar', value: isIftar);
                               CacheHelper.saveData(key: 'is_notify', value: isNotify);
-                              },
-                          ),
+                            },
+                          )
                         )
                       ],
                     ),
@@ -140,10 +139,9 @@ class _FastingNotifyTileState extends State<FastingNotifyTile> {
                             const Spacer(),
                             SizedBox(
                               height: 40.h,
-                              child: Switch(
-                                activeTrackColor: kPinkColor,
-                                value: isSohor,
-                                onChanged: (value) {
+                              child: CustomSwitch(
+                                switchValue: isSohor,
+                                function: (value) {
                                   setState(() {
                                     isSohor = value;
                                     if (isSohor) {
@@ -156,7 +154,7 @@ class _FastingNotifyTileState extends State<FastingNotifyTile> {
                                   CacheHelper.saveData(key: 'is_sohor', value: isSohor);
                                   CacheHelper.saveData(key: 'is_notify', value: isNotify);
                                 },
-                              ),
+                              )
                             )
                           ],
                         ),
