@@ -43,7 +43,7 @@ class AlarmService {
 
     // Schedule the alarm to trigger at the exact time
     final bool result = await AndroidAlarmManager.oneShotAt(
-     scheduleTime, // Use scheduleTime directly for accurate alarms
+      scheduleTime, // Use scheduleTime directly for accurate alarms
       id,
       alarmCallback,
       exact: true,
@@ -78,7 +78,7 @@ class AlarmService {
     // );
 
     // if (result) {
-      print('✅ Alarm scheduled successfully for ID: $id');
+    print('✅ Alarm scheduled successfully for ID: $id');
     // } else {
     //   print('❌ Failed to schedule alarm for ID: $id');
     // }
