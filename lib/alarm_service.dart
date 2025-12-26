@@ -3,8 +3,15 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:norway_roznama_new_project/main.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:workmanager/workmanager.dart';
 
+/// @deprecated This class uses AndroidAlarmManager with Dart callbacks which
+/// does NOT work when the app is terminated (MethodChannel fails).
+/// 
+/// Use [AdhanService.schedule()] from 'package:norway_roznama_new_project/core/audio/adhan_service.dart'
+/// instead, which uses native Android AlarmManager that works even when the app is terminated.
+/// 
+/// This class is kept for reference only and should not be used for new code.
+@Deprecated('Use AdhanService.schedule() instead - works when app is terminated')
 class AlarmService {
   static bool _isInitialized = false;
 
@@ -42,7 +49,7 @@ class AlarmService {
     print('📅 Scheduling alarm with ID: $id at $scheduleTime');
 
     // Schedule the alarm to trigger at the exact time
-    final bool result = await AndroidAlarmManager.oneShotAt(
+    await AndroidAlarmManager.oneShotAt(
       scheduleTime, // Use scheduleTime directly for accurate alarms
       id,
       alarmCallback,

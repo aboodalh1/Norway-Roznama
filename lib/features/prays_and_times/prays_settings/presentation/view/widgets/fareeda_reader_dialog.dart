@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/core/widgets/custom_snack_bar.dart';
 import '../../../../../../core/util/constant.dart';
 import '../../manger/prays_settings_cubit.dart';
+import '../../../../prays_and_qiblah/presentation/manger/prays_cubit.dart';
 
 import 'fareeda_tile.dart';
 
@@ -55,14 +56,22 @@ class _FareedaReaderDialogState extends State<FareedaReaderDialog> {
                   style: TextStyle(fontSize: 12.sp, color: Colors.blueAccent),
                 )),
             TextButton(
-                onPressed: () {
+                onPressed: () async {
                   widget.praysSettingsCubit.confirmReader(widget.widget.index);
+                  
+                  // Stop any playing preview
                   for (int i = 0;
                       i < widget.praysSettingsCubit.isPlaying.length;
                       i++) {
                     widget.praysSettingsCubit.isPlaying[i] = false;
                   }
                   widget.praysSettingsCubit.player.stop();
+                  
+                  // Re-schedule alarm if notification is enabled
+                  if (prayList[widget.widget.index].isNotify) {
+                    await context.read<PraysCubit>().reschedulePrayerAlarm(widget.widget.index);
+                  }
+                  
                   Navigator.of(context).pop();
                 },
                 child: Text(

@@ -10,7 +10,6 @@ import '../../../../fasting/presentation/view/fasting_page.dart';
 import '../../../../halal_food/presentation/view/halal_page.dart';
 import '../../../../prays_and_times/prays_and_qiblah/presentation/manger/prays_cubit.dart';
 import '../../../../prays_and_times/prays_settings/presentation/view/prays_settings.dart';
-import '../../../../zakah/presentation/view/zakah_view.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({super.key, required this.praysCubit, required this.index});
@@ -26,7 +25,6 @@ class _CustomCardState extends State<CustomCard> {
   bool isLight = true;
   List<String> images = [
     'assets/icons/praying.png',
-    'assets/icons/zakat.png',
     'assets/icons/fasting.png',
     'assets/icons/haj.png',
     'assets/icons/halal_icon.png',
@@ -34,7 +32,6 @@ class _CustomCardState extends State<CustomCard> {
   ];
   List<String> titles = [
     'صلاة وقبلة',
-    'الزكاة',
     'الصيام',
     'الحج والعمرة',
     'الأكلات الحلال',
@@ -42,7 +39,6 @@ class _CustomCardState extends State<CustomCard> {
   ];
   List<Widget> screens = [
     PraysAndQiblahPage(),
-    ZakahView(),
     FastingPage(),
     PraysSettings(),
     HalalPage(),
@@ -53,7 +49,7 @@ class _CustomCardState extends State<CustomCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (widget.index == 3) {
+        if (widget.index == 2) {
           showDialog(
               context: context,
               builder: (context) {
@@ -69,9 +65,7 @@ class _CustomCardState extends State<CustomCard> {
               borderRadius: BorderRadius.circular(10.r)),
           height: 111.h,
           width: 108.h,
-          padding: EdgeInsets
-              .all(6)
-              .w,
+          padding: EdgeInsets.all(6).w,
           child: Container(
             width: 99.w,
             height: 96.h,
@@ -110,10 +104,9 @@ class HajDialog extends StatelessWidget {
     return BlocProvider(
       create: (context) => HajCubit(),
       child: BlocConsumer<HajCubit, HajState>(
-        listener: (context, state) {
-        },
+        listener: (context, state) {},
         builder: (context, state) {
-          HajCubit hajCubit=context.read<HajCubit>();
+          HajCubit hajCubit = context.read<HajCubit>();
           return Directionality(
             textDirection: TextDirection.rtl,
             child: AlertDialog(
@@ -121,8 +114,7 @@ class HajDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(0)),
               title: Text(
                 "تنبيهات الحج والعمرة",
-                style: TextStyle(
-                    fontSize: 14.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
               ),
               content: SizedBox(
                 height: 96.h,
@@ -144,11 +136,8 @@ class HajDialog extends StatelessWidget {
                       child: SwitchListTile(
                           activeTrackColor: kPinkColor,
                           title: Text(
-                              !hajCubit.switchValue?
-                              "غير مفعلة":"مفعلة",
-                          style: TextStyle(
-                            fontSize: 14.sp
-                          ),
+                            !hajCubit.switchValue ? "غير مفعلة" : "مفعلة",
+                            style: TextStyle(fontSize: 14.sp),
                           ),
                           value: hajCubit.switchValue,
                           onChanged: (value) {

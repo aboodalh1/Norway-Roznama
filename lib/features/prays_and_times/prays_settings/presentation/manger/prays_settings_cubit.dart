@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
+import 'package:norway_roznama_new_project/core/util/adhan_sound_mapper.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/model/adhan_model.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/repo/adhan_repo.dart';
 import '../../../../../core/util/constant.dart';
@@ -23,9 +24,26 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
     }
     for (int i = 0; i < prayList.length; i++) {
       if (CacheHelper.getData(key: "pray_reader$i") != null) {
-        prayList[i].readerId = CacheHelper.getData(key: "pray_reader$i");
+        int cachedReaderId = CacheHelper.getData(key: "pray_reader$i");
+        
+        // Migrate old IDs (0-3) to new backend IDs (1-4) for backward compatibility
+        if (cachedReaderId >= 0 && cachedReaderId <= 3) {
+          cachedReaderId = cachedReaderId + 1; // 0->1, 1->2, 2->3, 3->4
+          CacheHelper.saveData(key: "pray_reader$i", value: cachedReaderId);
+        }
+        
+        prayList[i].readerId = cachedReaderId;
       }
-      prayList[i].reader = readers[prayList[i].readerId];
+      
+      // Map backend ID (1-4) to reader name using AdhanSoundMapper
+      final readerName = AdhanSoundMapper.getReaderNameFromBackendId(prayList[i].readerId);
+      if (readerName != null && readerName.isNotEmpty) {
+        prayList[i].reader = readerName;
+      } else {
+        // Default to Alafasi if not found
+        prayList[i].reader = 'مشاري العفاسي';
+        prayList[i].readerId = 1;
+      }
     }
     getAdhan();
     if (CacheHelper.getData(key: 'adhan_downloaded') != null) {
@@ -170,18 +188,17 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
   void confirmReader(int index) {
     lastReader = faredaReader;
     prayList[index].reader = faredaReader;
-    prayList[index].readerId = faredaReader == "مشاري العفاسي"
-        ? 0
-        : faredaReader == "ياسر الدوسري"
-            ? 1
-            : faredaReader == "محمود الحصري"
-                ? 2
-                : faredaReader == "عبدالباسط عبدالصمد"
-                    ? 3
-                    : 4;
+    
+    // Use AdhanSoundMapper to get backend ID from reader name
+    // Backend IDs: 1=Alafasi, 2=Yaser, 3=Alhusari, 4=Abd Albaset, 5=Default
+    prayList[index].readerId = AdhanSoundMapper.getBackendIdFromReaderName(faredaReader) ?? 1;
+    
     CacheHelper.saveData(
         key: "pray_reader$index", value: prayList[index].readerId);
-    print(adhanDownloaded[prayList[index].readerId]);
+    
+    final soundPath = AdhanSoundMapper.getAssetPath(prayList[index].readerId);
+    print('✅ [PraysSettingsCubit] Reader confirmed: $faredaReader (ID: ${prayList[index].readerId}), sound: $soundPath');
+    
     emit(ChangeReaderState());
   }
 

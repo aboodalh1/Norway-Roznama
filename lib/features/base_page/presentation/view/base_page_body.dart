@@ -76,7 +76,7 @@ class BasePageBody extends StatelessWidget {
               itemBuilder: (context, index) {
                 return CustomCard(praysCubit: praysCubit, index: index);
               },
-              itemCount: 6,
+              itemCount: 5,
             ),
           ),
           if(praysCubit.isOslo)Padding(

@@ -7,24 +7,29 @@ part 'settings_state.dart';
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit() : super(SettingsInitial());
 
-  List<SettingsTile>settingsTiles=[
-    SettingsTile(icon: "assets/icons/advice.png",
-        title: "نصيحة لنا", isSwitch: false,
+  List<SettingsTile> settingsTiles = [
+    SettingsTile(
+      icon: "assets/icons/advice.png",
+      title: "نصيحة لنا",
+      isSwitch: false,
     ),
-    SettingsTile(icon: "assets/icons/translate.png",
-        title: "تغيير اللغة", isSwitch: false,
+    SettingsTile(
+      icon: "assets/icons/translate.png",
+      title: "تغيير اللغة",
+      isSwitch: false,
     ),
-    SettingsTile(icon: "assets/icons/disable_notifications.png",
-        title: "تعطيل جميع التنبيهات", isSwitch: true),
-
+    SettingsTile(
+        icon: "assets/icons/disable_notifications.png",
+        title: "تعطيل جميع التنبيهات",
+        isSwitch: true),
+    // Test screen removed - native adhan scheduling is now integrated
   ];
   bool switchValue = false;
-  changeSwitchValue(bool value){
+  changeSwitchValue(bool value) {
     switchValue = value;
-    if(switchValue){
+    if (switchValue) {
       CacheHelper.saveData(key: "is_muted", value: true);
-    }
-    else {
+    } else {
       CacheHelper.saveData(key: "is_muted", value: false);
     }
     emit(ChangeSwitchValue());

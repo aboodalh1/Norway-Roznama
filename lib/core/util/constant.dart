@@ -50,9 +50,17 @@ Color kBlackGrey = const Color(0xff535763);
 Color kGreyColor = const Color(0xffD9D9D9);
 Color kPinkColor = const Color(0xffFF1C6B);
 Color kBlackGreyColor = const Color(0xFFAEAEAE);
-List<String> adhanDownloaded = ['assets/sounds/alafasi.mp3',
-  'assets/sounds/yaser.mp3', 'assets/sounds/alhusari.mp3',
-  'assets/sounds/abd_albaset.mp3','false'];
+/// Legacy list for downloaded adhan files.
+/// Note: For scheduling alarms, use AdhanSoundMapper instead.
+/// Backend IDs: 1=Alafasi, 2=Yaser, 3=Alhusari, 4=Abd Albaset
+/// This list uses 0-based indices but backend IDs are 1-based.
+List<String> adhanDownloaded = [
+  'assets/sounds/alafasi.mp3',    // Index 0 (Backend ID 1)
+  'assets/sounds/yaser.mp3',      // Index 1 (Backend ID 2)
+  'assets/sounds/alhusari.mp3',   // Index 2 (Backend ID 3)
+  'assets/sounds/abd_albaset.mp3', // Index 3 (Backend ID 4)
+  'false'                          // Index 4 (Backend ID 5 - default)
+];
 double latitude = 0;
 double longitude = 0;
 

@@ -31,8 +31,11 @@ class SettingsScreen extends StatelessWidget {
                 itemBuilder: (context,index){
               return InkWell(
                 onTap: (){
-                  index==0?navigateTo(context, AdvicePage()):
-                      index==2?settingsCubit.changeSwitchValue(!settingsCubit.switchValue):null;
+                  if (index == 0) {
+                    navigateTo(context, AdvicePage());
+                  } else if (index == 2) {
+                    settingsCubit.changeSwitchValue(!settingsCubit.switchValue);
+                  }
                 },
                 child: Row(
                   children: [
@@ -52,7 +55,7 @@ class SettingsScreen extends StatelessWidget {
                 ]),
               );
             }, separatorBuilder: (context,index){return SizedBox(height: 30.h);},
-                itemCount: 3),
+                itemCount: settingsCubit.settingsTiles.length),
           )
           );
         },

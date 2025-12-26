@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:norway_roznama_new_project/alarm_helper.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
+import 'package:norway_roznama_new_project/core/util/adhan_sound_mapper.dart';
 import 'package:norway_roznama_new_project/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/util/constant.dart';
-import '../../../../../main.dart';
 import '../../data/model/prays_model.dart';
 import '../../data/repos/prays_repo.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -255,12 +255,15 @@ class PraysCubit extends Cubit<PraysState> {
   void updateFaredaNotify(bool value, int index) async {
     prayList[index].isNotify = value;
     if (!value) {
+      // Cancel both local notification and native adhan alarm
       LocalNotificationService.cancelNotification(index);
+      await AlarmHelper.cancelPrayerAlarm(index);
       CacheHelper.saveData(key: 'pray_$index', value: value);
     }
     if (value) {
-      String? soundPath = adhanDownloaded[prayList[index].readerId];
-      if (soundPath.isNotEmpty) {
+      // Use AdhanSoundMapper to get asset path from backend ID (1-4)
+      String? soundPath = AdhanSoundMapper.getAssetPath(prayList[index].readerId);
+      if (soundPath != null && soundPath.isNotEmpty) {
         tz.initializeTimeZones();
         String currentTimeZone = await FlutterTimezone.getLocalTimezone();
         tz.setLocalLocation(tz.getLocation(currentTimeZone));
@@ -310,6 +313,62 @@ class PraysCubit extends Cubit<PraysState> {
       } else {}
     } else {}
     emit(ChangeFaredaState());
+  }
+
+  /// Re-schedule a prayer alarm when the reader/sound is changed.
+  /// 
+  /// This cancels the existing alarm and schedules a new one with the updated sound path.
+  Future<void> reschedulePrayerAlarm(int index) async {
+    if (!prayList[index].isNotify) {
+      // Notification not enabled, nothing to re-schedule
+      return;
+    }
+
+    print('🔄 [PraysCubit] Re-scheduling alarm for prayer $index with readerId: ${prayList[index].readerId}');
+
+    // Cancel the existing alarm first
+    await AlarmHelper.cancelPrayerAlarm(index);
+
+    // Get the new sound path based on readerId using AdhanSoundMapper
+    final soundPath = AdhanSoundMapper.getAssetPath(prayList[index].readerId);
+    
+    if (soundPath == null || soundPath.isEmpty) {
+      print('⚠️ [PraysCubit] No valid sound path for readerId: ${prayList[index].readerId}');
+      return;
+    }
+
+    try {
+      // Calculate the schedule time
+      tz.initializeTimeZones();
+      String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(currentTimeZone));
+      var currentTime = tz.TZDateTime.now(tz.local);
+
+      var scheduleTime = tz.TZDateTime(
+          tz.local,
+          currentTime.year,
+          currentTime.month,
+          currentTime.day,
+          datePraysTimes[index].hour,
+          datePraysTimes[index].minute);
+
+      // If the scheduled time is in the past, schedule for the next day
+      if (scheduleTime.isBefore(currentTime)) {
+        scheduleTime = scheduleTime.add(const Duration(days: 1));
+      }
+
+      // Re-schedule the alarm with the new sound
+      await AlarmHelper.setPrayerAlarm(
+        id: index,
+        prayerName: praysName[index],
+        prayerTime: scheduleTime,
+        customSoundPath: soundPath,
+      );
+
+      print('✅ [PraysCubit] Alarm re-scheduled successfully with sound: $soundPath');
+    } catch (e) {
+      print('❌ [PraysCubit] Error re-scheduling alarm: $e');
+    }
   }
 
   void updateFaredaTime(double time, int index) {

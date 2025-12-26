@@ -63,15 +63,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <receiver
-            android:name="be.tramckrijte.workmanager.WorkManagerBroadcastReceiver"
-            android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.REBOOT"/>
-            </intent-filter>
-        </receiver>
 
         <receiver android:exported="true" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
@@ -84,6 +75,29 @@
         <receiver
             android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
             android:exported="true" />
+        
+        <!-- Adhan Foreground Service - manages audio playback and notification -->
+        <service
+            android:name=".AdhanForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+        
+        <!-- Adhan Stop Receiver - handles notification stop action -->
+        <receiver
+            android:name=".AdhanStopReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.norway_roznama_new_project.ACTION_STOP_ADHAN"/>
+            </intent-filter>
+        </receiver>
+        
+        <!-- Adhan Alarm Receiver - handles scheduled alarm triggers (works when app terminated) -->
+        <receiver
+            android:name=".AdhanAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
         <receiver
             android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
             android:enabled="true"
@@ -105,6 +119,14 @@
             android:foregroundServiceType="mediaPlayback"
             android:enabled="true"
             android:exported="false"/>
+
+        <!-- Ensure media playback foreground service for audio_service -->
+        <service
+            android:name="com.ryanheise.audioservice.AudioService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            tools:node="merge" />
 
         <!-- This is crucial for android_alarm_manager_plus to work in the background -->
         <meta-data
