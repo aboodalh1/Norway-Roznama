@@ -1,4 +1,4 @@
-package com.example.norway_roznama_new_project
+package com.islamic_mojamma.norway_roznama_new_project
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -6,7 +6,7 @@ import io.flutter.plugin.common.MethodChannel
 import android.util.Log
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.example.norway_roznama_new_project/adhan_service"
+    private val CHANNEL = "com.islamic_mojamma.norway_roznama_new_project/adhan_service"
     private val TAG = "MainActivity"
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -74,3 +74,4 @@ class MainActivity: FlutterActivity() {
         }
     }
 }
+

@@ -146,28 +146,63 @@ void disposeAudioPlayer() {
 
 
 
-Future<void> requestPermissions() async {
+Future<bool> requestPermissions() async {
   print('🔐 Requesting permissions...');
+  bool allGranted = true;
 
   if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
+    final status = await Permission.notification.request();
+    if (!status.isGranted) allGranted = false;
   }
 
   if (Platform.isAndroid) {
     // Request POST_NOTIFICATIONS permission for Android 13+
     if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
+      final status = await Permission.notification.request();
+       if (!status.isGranted) allGranted = false;
     }
 
-    // Request SCHEDULE_EXACT_ALARM for Android 12+
+    // Request SCHEDULE_EXACT_ALARM for Android 12+ (required for exact alarms)
     if (await Permission.scheduleExactAlarm.isDenied) {
-      await Permission.scheduleExactAlarm.request();
+      final status = await Permission.scheduleExactAlarm.request();
+       if (!status.isGranted) allGranted = false;
     }
+    
     // Request USE_FULL_SCREEN_INTENT for Android 10+ for heads-up notifications
     if (await Permission.systemAlertWindow.isDenied) {
       await Permission.systemAlertWindow.request();
     }
+    
+    // Request ignore battery optimizations for reliable alarm delivery
+    if (await Permission.ignoreBatteryOptimizations.isDenied) {
+      await Permission.ignoreBatteryOptimizations.request();
+    }
   }
 
-  print('✅ Permissions requested');
+  print('✅ Permissions requested, success: $allGranted');
+  return allGranted;
+}
+
+Future<bool> checkNotificationPermissions() async {
+  if (Platform.isAndroid) {
+    // Check notification permission (Android 13+)
+    if (await Permission.notification.isDenied) {
+      print('❌ Notification permission denied');
+      return false;
+    }
+
+    // Check exact alarm permission (Android 12+)
+    // Note: This permission is usually granted by default but user can revoke it
+    if (await Permission.scheduleExactAlarm.isDenied) {
+      print('❌ Exact alarm permission denied');
+      return false;
+    }
+  }
+  
+  // Also check general notification permission
+  if (await Permission.notification.isDenied) {
+    return false;
+  }
+
+  return true;
 }

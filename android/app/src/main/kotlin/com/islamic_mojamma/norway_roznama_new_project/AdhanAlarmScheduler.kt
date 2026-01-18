@@ -1,4 +1,4 @@
-package com.example.norway_roznama_new_project
+package com.islamic_mojamma.norway_roznama_new_project
 
 import android.app.AlarmManager
 import android.app.PendingIntent

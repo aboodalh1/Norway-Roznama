@@ -25,18 +25,19 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
     for (int i = 0; i < prayList.length; i++) {
       if (CacheHelper.getData(key: "pray_reader$i") != null) {
         int cachedReaderId = CacheHelper.getData(key: "pray_reader$i");
-        
+
         // Migrate old IDs (0-3) to new backend IDs (1-4) for backward compatibility
         if (cachedReaderId >= 0 && cachedReaderId <= 3) {
           cachedReaderId = cachedReaderId + 1; // 0->1, 1->2, 2->3, 3->4
           CacheHelper.saveData(key: "pray_reader$i", value: cachedReaderId);
         }
-        
+
         prayList[i].readerId = cachedReaderId;
       }
-      
+
       // Map backend ID (1-4) to reader name using AdhanSoundMapper
-      final readerName = AdhanSoundMapper.getReaderNameFromBackendId(prayList[i].readerId);
+      final readerName =
+          AdhanSoundMapper.getReaderNameFromBackendId(prayList[i].readerId);
       if (readerName != null && readerName.isNotEmpty) {
         prayList[i].reader = readerName;
       } else {
@@ -188,17 +189,19 @@ class PraysSettingsCubit extends Cubit<PraysSettingsState> {
   void confirmReader(int index) {
     lastReader = faredaReader;
     prayList[index].reader = faredaReader;
-    
+
     // Use AdhanSoundMapper to get backend ID from reader name
     // Backend IDs: 1=Alafasi, 2=Yaser, 3=Alhusari, 4=Abd Albaset, 5=Default
-    prayList[index].readerId = AdhanSoundMapper.getBackendIdFromReaderName(faredaReader) ?? 1;
-    
+    prayList[index].readerId =
+        AdhanSoundMapper.getBackendIdFromReaderName(faredaReader) ?? 1;
+
     CacheHelper.saveData(
         key: "pray_reader$index", value: prayList[index].readerId);
-    
+
     final soundPath = AdhanSoundMapper.getAssetPath(prayList[index].readerId);
-    print('✅ [PraysSettingsCubit] Reader confirmed: $faredaReader (ID: ${prayList[index].readerId}), sound: $soundPath');
-    
+    print(
+        '✅ [PraysSettingsCubit] Reader confirmed: $faredaReader (ID: ${prayList[index].readerId}), sound: $soundPath');
+
     emit(ChangeReaderState());
   }
 

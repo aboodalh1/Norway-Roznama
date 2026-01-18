@@ -15,6 +15,14 @@ class ServerFailure extends Failure {
         return ServerFailure('Send timeout with ApiServer');
       case DioExceptionType.receiveTimeout:
         return ServerFailure('Receive timeout with ApiServer');
+      case DioExceptionType.connectionError:
+        if (dioError.message != null && 
+            (dioError.message!.contains('SocketException') || 
+             dioError.message!.contains('connection abort') ||
+             dioError.message!.contains('Software caused connection abort'))) {
+          return ServerFailure('لا يوجد اتصال بالانترنت');
+        }
+        return ServerFailure('فشل الاتصال بالخادم، أعد المحاولة');
       case DioExceptionType.badResponse:
         return ServerFailure.fromResponse(
             dioError.response!.statusCode, dioError.response!.data);
@@ -22,7 +30,9 @@ class ServerFailure extends Failure {
         return ServerFailure('Request to ApiServer was canceled');
       case DioExceptionType.unknown:
         if(dioError.message==null){return ServerFailure("حدث خطأ في المخدم");}
-        if (dioError.message!.contains('SocketException')) {
+        if (dioError.message!.contains('SocketException') || 
+            dioError.message!.contains('connection abort') ||
+            dioError.message!.contains('Software caused connection abort')) {
           return ServerFailure('لا يوجد اتصال بالانترنت');
         }
         return ServerFailure('حدث خطأ ما، أعد المحاولة');

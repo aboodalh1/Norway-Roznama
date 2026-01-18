@@ -79,16 +79,34 @@ class BasePageBody extends StatelessWidget {
               itemCount: 5,
             ),
           ),
-          if(praysCubit.isOslo)Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 21.0.w,vertical: 20.h),
-            child: Row(
-              children: [
-                Icon(Icons.warning_amber,color: Colors.red.withValues(alpha: 0.6),size: 24.sp,),
-                Text("تنبيه:",style: TextStyle(fontSize: 18.sp,fontWeight: FontWeight.w600,color: kBlackGrey),),
-              ],
+          if (praysCubit.isOslo)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 21.0.w, vertical: 20.h),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber,
+                    color: Colors.red.withValues(alpha: 0.6),
+                    size: 24.sp,
+                  ),
+                  Text(
+                    "تنبيه:",
+                    style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: kBlackGrey),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if(praysCubit.isOslo)Text("أوقات الصلاة بتوقيت مدينة أوسلو، النرويج",style: TextStyle(fontSize: 17.sp,fontWeight: FontWeight.w600,color: kBlackGrey),)
+          if (praysCubit.isOslo)
+            Text(
+              "أوقات الصلاة بتوقيت مدينة أوسلو، النرويج",
+              style: TextStyle(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w600,
+                  color: kBlackGrey),
+            )
         ],
       ),
     );

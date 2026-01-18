@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -18,7 +19,13 @@ import 'api_service.dart';
 final getIt = GetIt.instance;
 
 void setupServiceLocator() {
-  final dio = Dio();
+  final dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 30),
+    ),
+  );
 
   // Bypass SSL certificate verification
   dio.httpClientAdapter = IOHttpClientAdapter(
@@ -27,6 +34,39 @@ void setupServiceLocator() {
       client.badCertificateCallback = (cert, host, port) => true;
       return client;
     },
+  );
+
+  // Add retry interceptor for connection errors
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onError: (error, handler) async {
+        if (error.type == DioExceptionType.connectionError ||
+            error.type == DioExceptionType.connectionTimeout ||
+            (error.type == DioExceptionType.unknown &&
+                (error.message?.contains('SocketException') == true ||
+                 error.message?.contains('connection abort') == true ||
+                 error.message?.contains('Software caused connection abort') == true))) {
+          final retryCount = (error.requestOptions.extra['retryCount'] as int?) ?? 0;
+          const maxRetries = 3;
+          
+          if (retryCount < maxRetries) {
+            error.requestOptions.extra['retryCount'] = retryCount + 1;
+            final delay = Duration(milliseconds: 1000 * (retryCount + 1));
+            await Future.delayed(delay);
+            try {
+              final response = await dio.fetch(error.requestOptions);
+              return handler.resolve(response);
+            } catch (e) {
+              if (e is DioException) {
+                return handler.next(e);
+              }
+              return handler.next(error);
+            }
+          }
+        }
+        return handler.next(error);
+      },
+    ),
   );
 
   dio.interceptors.add(

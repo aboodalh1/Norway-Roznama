@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 /// Stop button works even when app is terminated because the service runs independently.
 class AdhanService {
   static const MethodChannel _channel = MethodChannel(
-    'com.example.norway_roznama_new_project/adhan_service',
+    'com.islamic_mojamma.norway_roznama_new_project/adhan_service',
   );
 
   /// Cache for copied asset files to avoid re-copying
@@ -85,6 +85,8 @@ class AdhanService {
   /// This works even when the app is terminated because it uses native Android
   /// AlarmManager directly, which triggers AdhanAlarmReceiver -> AdhanForegroundService.
   ///
+  /// Returns false if exact alarms cannot be scheduled (Android 12+ permission denied).
+  ///
   /// [alarmId] - Unique ID for this alarm (used for cancellation)
   /// [scheduledTime] - When the alarm should fire
   /// [soundPath] - Path to the audio file in assets (e.g., "sounds/alafasi.mp3")
@@ -101,6 +103,16 @@ class AdhanService {
         '📅 [AdhanService] Scheduling alarm - id: $alarmId, time: $scheduledTime');
 
     try {
+      // Check if exact alarms are allowed (Android 12+ requires user permission)
+      final canSchedule = await canScheduleExactAlarms();
+      if (!canSchedule) {
+        print(
+            '❌ [AdhanService] Exact alarms not allowed - permission denied on Android 12+');
+        print(
+            '⚠️ [AdhanService] User needs to enable "Alarms & reminders" permission in app settings');
+        return false;
+      }
+
       // Prepare the asset file first (copy to temp directory)
       // This is necessary because the native service needs a file path
       final filePath = await _prepareAssetFile(soundPath);

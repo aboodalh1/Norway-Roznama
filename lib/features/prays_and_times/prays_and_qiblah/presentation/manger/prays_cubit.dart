@@ -90,6 +90,9 @@ class PraysCubit extends Cubit<PraysState> {
         int minute = int.parse(parts[1].substring(0, 2));
         return DateTime(now.year, now.month, now.day, hour, minute);
       }).toList();
+      
+      // Reschedule notifications after loading local times
+      rescheduleAllPrayerNotifications();
 
       emit(GetLocalPrayersTimesSuccess());
     } else {
@@ -117,6 +120,9 @@ class PraysCubit extends Cubit<PraysState> {
       int minute = int.parse(parts[1].substring(0, 2));
       return DateTime(now.year, now.month, now.day, hour, minute);
     }).toList();
+    
+    // Reschedule notifications after assigning new times
+    rescheduleAllPrayerNotifications();
   }
 
   DateTime? getNearestPrayTime() {
@@ -262,7 +268,8 @@ class PraysCubit extends Cubit<PraysState> {
     }
     if (value) {
       // Use AdhanSoundMapper to get asset path from backend ID (1-4)
-      String? soundPath = AdhanSoundMapper.getAssetPath(prayList[index].readerId);
+      String? soundPath =
+          AdhanSoundMapper.getAssetPath(prayList[index].readerId);
       if (soundPath != null && soundPath.isNotEmpty) {
         tz.initializeTimeZones();
         String currentTimeZone = await FlutterTimezone.getLocalTimezone();
@@ -300,7 +307,7 @@ class PraysCubit extends Cubit<PraysState> {
         // await AlarmHelper.setCustomAlarm(hour: datePraysTimes[index].hour,minute: datePraysTimes[index].minute, title: 'Salat', message: "Salat Duhr");
         LocalNotificationService.showDailySchduledNotification(
           index + 400,
-          "إقامة " + praysName[index],
+          "إقامة ${praysName[index]}",
           soundPath: soundPath, // Extract the file name without extension
           datePraysTimes[index]
               .add(Duration(minutes: prayList[index].time.toInt()))
@@ -316,7 +323,7 @@ class PraysCubit extends Cubit<PraysState> {
   }
 
   /// Re-schedule a prayer alarm when the reader/sound is changed.
-  /// 
+  ///
   /// This cancels the existing alarm and schedules a new one with the updated sound path.
   Future<void> reschedulePrayerAlarm(int index) async {
     if (!prayList[index].isNotify) {
@@ -324,16 +331,18 @@ class PraysCubit extends Cubit<PraysState> {
       return;
     }
 
-    print('🔄 [PraysCubit] Re-scheduling alarm for prayer $index with readerId: ${prayList[index].readerId}');
+    print(
+        '🔄 [PraysCubit] Re-scheduling alarm for prayer $index with readerId: ${prayList[index].readerId}');
 
     // Cancel the existing alarm first
     await AlarmHelper.cancelPrayerAlarm(index);
 
     // Get the new sound path based on readerId using AdhanSoundMapper
     final soundPath = AdhanSoundMapper.getAssetPath(prayList[index].readerId);
-    
+
     if (soundPath == null || soundPath.isEmpty) {
-      print('⚠️ [PraysCubit] No valid sound path for readerId: ${prayList[index].readerId}');
+      print(
+          '⚠️ [PraysCubit] No valid sound path for readerId: ${prayList[index].readerId}');
       return;
     }
 
@@ -365,9 +374,103 @@ class PraysCubit extends Cubit<PraysState> {
         customSoundPath: soundPath,
       );
 
-      print('✅ [PraysCubit] Alarm re-scheduled successfully with sound: $soundPath');
+      print(
+          '✅ [PraysCubit] Alarm re-scheduled successfully with sound: $soundPath');
     } catch (e) {
       print('❌ [PraysCubit] Error re-scheduling alarm: $e');
+    }
+  }
+
+  Future<void> rescheduleAllPrayerNotifications() async {
+    print('🔄 [PraysCubit] Rescheduling all prayer notifications...');
+
+    // 1. Check permissions first
+    bool hasPermissions = await checkNotificationPermissions();
+    if (!hasPermissions) {
+      print('⚠️ [PraysCubit] Missing permissions for notifications. Attempting to request...');
+      hasPermissions = await requestPermissions();
+      if (!hasPermissions) {
+        print('❌ [PraysCubit] Permissions denied. Cannot schedule notifications.');
+        return;
+      }
+    }
+
+    // 2. Initialize timezones
+    try {
+      tz.initializeTimeZones();
+      String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    } catch (e) {
+      print('❌ [PraysCubit] Error initializing timezones: $e');
+      return;
+    }
+
+    var currentTime = tz.TZDateTime.now(tz.local);
+
+    // 3. Iterate over all prayers
+    for (int i = 0; i < prayList.length; i++) {
+      // Only schedule if notification is enabled for this prayer
+      if (prayList[i].isNotify) {
+        try {
+          // Cancel existing notifications first to avoid duplicates
+          LocalNotificationService.cancelNotification(i);
+          await AlarmHelper.cancelPrayerAlarm(i);
+          
+          // Also cancel Iqama notification (index + 400)
+          LocalNotificationService.cancelNotification(i + 400);
+
+          // Get sound path
+          String? soundPath = AdhanSoundMapper.getAssetPath(prayList[i].readerId);
+          if (soundPath == null || soundPath.isEmpty) {
+            // Default to Alafasi if sound not found
+            soundPath = AdhanSoundMapper.getAssetPath(1);
+          }
+          
+          if (soundPath != null && soundPath.isNotEmpty) {
+             // Calculate prayer time
+             if (i < datePraysTimes.length) {
+                var scheduleTime = tz.TZDateTime(
+                    tz.local,
+                    currentTime.year,
+                    currentTime.month,
+                    currentTime.day,
+                    datePraysTimes[i].hour,
+                    datePraysTimes[i].minute
+                );
+
+                // If time has passed for today, schedule for tomorrow
+                if (scheduleTime.isBefore(currentTime)) {
+                  scheduleTime = scheduleTime.add(const Duration(days: 1));
+                }
+
+                // Schedule Adhan Alarm (Background/Terminated)
+                await AlarmHelper.setPrayerAlarm(
+                  id: i,
+                  prayerName: praysName[i],
+                  prayerTime: scheduleTime,
+                  customSoundPath: soundPath,
+                );
+                
+                print('✅ [PraysCubit] Scheduled Adhan for ${praysName[i]} at $scheduleTime');
+
+                // Schedule Iqama Notification (Foreground/Background)
+                var iqamaTime = scheduleTime.add(Duration(minutes: prayList[i].time.toInt()));
+                
+                LocalNotificationService.showDailySchduledNotification(
+                  i + 400,
+                  "إقامة ${praysName[i]}",
+                  soundPath: soundPath, 
+                  iqamaTime.hour,
+                  iqamaTime.minute,
+                );
+                
+                print('✅ [PraysCubit] Scheduled Iqama for ${praysName[i]} at $iqamaTime');
+             }
+          }
+        } catch (e) {
+          print('❌ [PraysCubit] Error scheduling notification for prayer $i: $e');
+        }
+      }
     }
   }
 

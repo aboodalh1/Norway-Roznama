@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
 class DioHelper {
-  final baseUrl = 'https://195.35.3.38:444/';
+  final baseUrl = 'https://srv709257.hstgr.cloud:444/';
   final Dio dio;
   static String? _token;
   DioHelper(this.dio);

@@ -1,15 +1,14 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:norway_roznama_new_project/features/articles_and_stickers/data/model/stickers/stickers_model.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../data/repos/stickers_repos/stickers_repo.dart';
 part 'stickers_state.dart';
-
 
 class StickersCubit extends Cubit<StickersState> {
   StickersCubit(this.stickersRepo)
@@ -48,8 +47,7 @@ class StickersCubit extends Cubit<StickersState> {
         } else {
           emit(StickersLoaded(true)); // At the bottom
         }
-      }
-    else {
+      } else {
         emit(StickersLoaded(false)); // More items to scroll
       }
     }
@@ -91,45 +89,53 @@ class StickersCubit extends Cubit<StickersState> {
     }
   }
 
-  Future<String> saveNetworkImageLocally(String imageUrl, String fileName) async {
+  Future<String> saveNetworkImageLocally(
+      String imageUrl, String fileName) async {
     emit(StickerSaveLoading());
-    await Permission.manageExternalStorage.request();
-      try {
-      if (await Permission.storage.isDenied) {
-        await Permission.storage.request();
-      }
-
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-      if (selectedDirectory == null) {
-        emit(StickerSavedFailure(error: "لم يتم اختيار مجلد لحفظ الملصق"));
-        return '';
-      }
-
-      final sanitizedFileName =
-      fileName.endsWith(".png") ? fileName : "$fileName.png";
-      final filePath = '$selectedDirectory/$sanitizedFileName';
-
+    try {
+      // Download image bytes
       final dio = Dio();
       final response = await dio.get(
         imageUrl,
         options: Options(responseType: ResponseType.bytes),
       );
-      if (response.statusCode == 200) {
-        final file = File(filePath);
-        await file.writeAsBytes(response.data);
 
-        emit(StickerSavedSuccess(message: "تم حفظ الملصق بنجاح"));
-        return filePath;
-      } else {
+      if (response.statusCode != 200) {
         emit(StickerSavedFailure(error: "حدث خطأ أثناء تحميل الصورة"));
         throw Exception("Error: ${response.statusCode}");
       }
+
+      // Save image directly to gallery using image_gallery_saver_plus
+      // This uses MediaStore API and works with Scoped Storage
+      final sanitizedFileName =
+          fileName.endsWith(".png") ? fileName : "$fileName.png";
+
+      final Uint8List imageBytes = Uint8List.fromList(response.data);
+
+      // Save to gallery - this will make it visible in gallery apps
+      final result = await ImageGallerySaverPlus.saveImage(
+        imageBytes,
+        name: sanitizedFileName.replaceAll('.png', ''),
+        quality: 100,
+      );
+
+      // Extract path from result
+      final savedPath =
+          result['filePath'] as String? ?? result['path'] as String? ?? '';
+
+      if (result['isSuccess'] == true && savedPath.isNotEmpty) {
+        emit(StickerSavedSuccess(message: "تم حفظ الملصق في معرض الصور بنجاح"));
+        return savedPath;
+      } else {
+        emit(StickerSavedFailure(error: "حدث خطأ أثناء حفظ الملصق"));
+        throw Exception('Failed to save image to gallery');
+      }
     } catch (e) {
-      emit(StickerSavedFailure(error: "حدث خطأ أثناء حفظ الملصق"));
+      emit(StickerSavedFailure(
+          error: "حدث خطأ أثناء حفظ الملصق: ${e.toString()}"));
       throw Exception('Error saving network image: $e');
     }
   }
-
 
   Future<void> getStickers({required catId}) async {
     emit(StickersLoadingState());
@@ -142,16 +148,12 @@ class StickersCubit extends Cubit<StickersState> {
     });
   }
 
-
-
- StickersModel stickersModel = StickersModel(
-   data: [],
-
- );
+  StickersModel stickersModel = StickersModel(
+    data: [],
+  );
   StickersModel newStickersModel = StickersModel(
-   data: [],
-
- );
+    data: [],
+  );
 
   Future<void> getMoreStickers({required String path}) async {
     emit(MoreStickersLoadingState());

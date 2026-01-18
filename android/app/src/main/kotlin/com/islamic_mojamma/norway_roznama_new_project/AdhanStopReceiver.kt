@@ -1,4 +1,4 @@
-package com.example.norway_roznama_new_project
+package com.islamic_mojamma.norway_roznama_new_project
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,7 +13,7 @@ class AdhanStopReceiver : BroadcastReceiver() {
     
     companion object {
         const val TAG = "AdhanStopReceiver"
-        const val ACTION_STOP_ADHAN = "com.example.norway_roznama_new_project.ACTION_STOP_ADHAN"
+        const val ACTION_STOP_ADHAN = "com.islamic_mojamma.norway_roznama_new_project.ACTION_STOP_ADHAN"
     }
     
     override fun onReceive(context: Context, intent: Intent) {
@@ -31,3 +31,4 @@ class AdhanStopReceiver : BroadcastReceiver() {
         }
     }
 }
+

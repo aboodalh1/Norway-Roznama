@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:jhijri/_src/_jHijri.dart';
-import 'package:norway_roznama_new_project/alarm_service.dart';
 import 'package:norway_roznama_new_project/core/audio/adhan_audio_handler.dart';
 import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
@@ -265,7 +264,7 @@ Future<void> main() async {
     // #endregion
 
     // Initialize alarm service
-    await AlarmService.initialize();
+    // await AlarmService.initialize();
 
     // #region agent log
     try {
@@ -283,10 +282,10 @@ Future<void> main() async {
 
     await Workmanager().initialize(
       callbackDispatcher,
-      isInDebugMode: true, // Set to false for production
+      isInDebugMode: false, // false for production (Release mode)
     );
-    // Request necessary permissions
-    await requestPermissions();
+    // NOTE: Permissions are now requested in SplashScreen after UI is visible
+    // This prevents silent permission failures in release mode
 
     // #region agent log
     try {
