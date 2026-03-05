@@ -19,11 +19,28 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   
-  /// Request permissions after the first frame is rendered.
+  /// Request all permissions after the first frame is rendered (only on first launch).
   /// This ensures the Activity is visible, preventing silent permission failures in release.
+  /// Permissions are requested only once on first launch, stored in cache to avoid repeated requests.
   void _requestPermissionsAfterFrame() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await requestPermissions();
+      // Check if permissions were already requested on first launch
+      final bool? permissionsRequested = CacheHelper.getData(key: 'permissions_requested');
+      
+      if (permissionsRequested != true) {
+        // First launch - request all permissions together
+        print('📱 First launch detected - requesting all permissions...');
+        await requestPermissions();
+        
+        // Also fetch location after permissions are granted
+        fetchLocation();
+        
+        // Mark permissions as requested to avoid future prompts
+        await CacheHelper.saveData(key: 'permissions_requested', value: true);
+        print('✅ Permissions requested and flag saved');
+      } else {
+        print('📱 Permissions already requested on previous launch');
+      }
     });
   }
   

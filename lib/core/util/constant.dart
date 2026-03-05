@@ -147,39 +147,40 @@ void disposeAudioPlayer() {
 
 
 Future<bool> requestPermissions() async {
-  print('🔐 Requesting permissions...');
+  print('🔐 Requesting all permissions...');
   bool allGranted = true;
 
+  // 1. Request notification permission
   if (await Permission.notification.isDenied) {
     final status = await Permission.notification.request();
     if (!status.isGranted) allGranted = false;
   }
 
-  if (Platform.isAndroid) {
-    // Request POST_NOTIFICATIONS permission for Android 13+
-    if (await Permission.notification.isDenied) {
-      final status = await Permission.notification.request();
-       if (!status.isGranted) allGranted = false;
-    }
+  // 2. Request location permission
+  if (await Permission.location.isDenied) {
+    final status = await Permission.location.request();
+    if (!status.isGranted) allGranted = false;
+  }
 
-    // Request SCHEDULE_EXACT_ALARM for Android 12+ (required for exact alarms)
+  if (Platform.isAndroid) {
+    // 3. Request SCHEDULE_EXACT_ALARM for Android 12+ (required for exact alarms)
     if (await Permission.scheduleExactAlarm.isDenied) {
       final status = await Permission.scheduleExactAlarm.request();
-       if (!status.isGranted) allGranted = false;
+      if (!status.isGranted) allGranted = false;
     }
     
-    // Request USE_FULL_SCREEN_INTENT for Android 10+ for heads-up notifications
-    if (await Permission.systemAlertWindow.isDenied) {
-      await Permission.systemAlertWindow.request();
-    }
-    
-    // Request ignore battery optimizations for reliable alarm delivery
+    // 4. Request ignore battery optimizations for reliable alarm delivery
     if (await Permission.ignoreBatteryOptimizations.isDenied) {
       await Permission.ignoreBatteryOptimizations.request();
     }
+    
+    // 5. Request system alert window (overlay) permission for heads-up notifications
+    if (await Permission.systemAlertWindow.isDenied) {
+      await Permission.systemAlertWindow.request();
+    }
   }
 
-  print('✅ Permissions requested, success: $allGranted');
+  print('✅ All permissions requested, success: $allGranted');
   return allGranted;
 }
 
