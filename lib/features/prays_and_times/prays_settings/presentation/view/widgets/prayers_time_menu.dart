@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/presentation/manger/prays_settings_cubit.dart';
 import '../../../../prays_and_qiblah/presentation/manger/prays_cubit.dart';
 import 'fareeda_tile.dart';
+import 'imsak_tile.dart';
 
 class FareedaSettingsList extends StatelessWidget {
   const FareedaSettingsList({super.key, required this.praysCubit, required this.praysSettingsCubit});
@@ -22,19 +23,21 @@ class FareedaSettingsList extends StatelessWidget {
           curve: Curves.easeInOut,
           height: praysSettingsCubit.isExpand
               ? praysSettingsCubit.isFaredaExpand
-                  ? 620
-                  : 510
+                  ? 670
+                  : 560
               : 0,
-          child: ListView.builder(
+          child: ListView(
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 7,
-              itemBuilder: (context, index) {
-                return FaredaTile(
+              children: [
+                ImsakTile(praysCubit: praysCubit),
+                ...List.generate(7, (index) {
+                  return FaredaTile(
                     praysSettingsCubit: praysSettingsCubit,
                     index: index,
-                    praysCubit: praysCubit
-                );
-              }),
+                    praysCubit: praysCubit,
+                  );
+                }),
+              ]),
         ),
 
       ],

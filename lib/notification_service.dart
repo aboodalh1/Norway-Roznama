@@ -44,7 +44,7 @@ class LocalNotificationService {
   @pragma('vm:entry-point')
   static void showDailySchduledNotification(
       int id, String prayName, int hour, int minute,
-      {String? soundPath}) async {
+      {String? soundPath, String? body}) async {
     if (CacheHelper.getData(key: "is_muted") != null &&
         CacheHelper.getData(key: "is_muted")) {
       return;
@@ -91,10 +91,12 @@ class LocalNotificationService {
       scheduleTime = scheduleTime.add(const Duration(days: 1));
     }
 
+    final String notificationBody = body ?? prayName;
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       prayName,
-      prayName,
+      notificationBody,
       scheduleTime,
       details,
       payload: 'zonedSchedule',

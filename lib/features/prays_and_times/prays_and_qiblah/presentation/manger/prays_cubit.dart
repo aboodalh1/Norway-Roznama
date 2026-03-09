@@ -5,6 +5,7 @@ import 'package:norway_roznama_new_project/alarm_helper.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/core/util/adhan_sound_mapper.dart';
 import 'package:norway_roznama_new_project/notification_service.dart';
+import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/util/constant.dart';
@@ -54,6 +55,15 @@ class PraysCubit extends Cubit<PraysState> {
 
   int neartestPrayIndex = 0;
 
+  /// Notification ID for Imsak alert. Must not conflict with prayer IDs (0-6) or iqama (400-406).
+  static const int imsakNotificationId = 500;
+
+  /// Imsak is Fajr - 10 minutes.
+  static const int imsakMinutesBeforeFajr = 10;
+
+  /// Persistent state for Imsak alert. Disabled by default.
+  bool isImsakAlertEnabled = false;
+
   void convertTo24HourFormat() {
     for (int i = 0; i < stringPraysTimes12Format.length; i++) {
       stringPraysTimes24Format[i] =
@@ -80,6 +90,9 @@ class PraysCubit extends Cubit<PraysState> {
         if (CacheHelper.getData(key: "pray_$i") != null) {
           prayList[i].isNotify = CacheHelper.getData(key: "pray_$i");
         }
+      }
+      if (CacheHelper.getData(key: 'is_imsak_alert_enabled') != null) {
+        isImsakAlertEnabled = CacheHelper.getData(key: 'is_imsak_alert_enabled');
       }
       convertTo24HourFormat();
 
@@ -472,6 +485,9 @@ class PraysCubit extends Cubit<PraysState> {
         }
       }
     }
+
+    // Reschedule Imsak notification when prayer times change (independent from Fajr)
+    await _rescheduleImsakIfEnabled();
   }
 
   void updateFaredaTime(double time, int index) {
@@ -481,6 +497,67 @@ class PraysCubit extends Cubit<PraysState> {
   }
 
   double faredaTime = 5;
+
+  /// Returns Imsak time (Fajr - 10 minutes). Handles midnight crossover:
+  /// e.g. Fajr 00:05 -> Imsak 23:55 previous day. We pass hour/minute to the
+  /// scheduler which uses current day; the scheduler correctly finds the next
+  /// occurrence (e.g. tonight 23:55 if now is after midnight).
+  DateTime? getImsakDateTime() {
+    if (datePraysTimes.isEmpty) return null;
+    final fajrTime = datePraysTimes[0];
+    return fajrTime.subtract(const Duration(minutes: imsakMinutesBeforeFajr));
+  }
+
+  /// Formatted Imsak time string for display (12h or 24h based on Is24Format).
+  String getImsakTimeFormatted() {
+    final dt = getImsakDateTime();
+    if (dt == null) return '--:--';
+    // Use same format as prayer times - stringPraysTimes12Format/24Format
+    if (Is24Format.is24TimeFormat) {
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    }
+    final format12 = DateFormat('hh:mm a');
+    return format12.format(dt);
+  }
+
+  /// Toggle Imsak alert on/off. Independent from Fajr alert.
+  Future<void> updateImsakNotify(bool value) async {
+    isImsakAlertEnabled = value;
+    CacheHelper.saveData(key: 'is_imsak_alert_enabled', value: value);
+    if (!value) {
+      LocalNotificationService.cancelNotification(imsakNotificationId);
+    } else {
+      await _scheduleImsakNotification();
+    }
+    emit(ChangeFaredaState());
+  }
+
+  /// Schedule Imsak notification. Called when enabled or when prayer times are refreshed.
+  Future<void> _scheduleImsakNotification() async {
+    final imsakDt = getImsakDateTime();
+    if (imsakDt == null) return;
+    LocalNotificationService.showDailySchduledNotification(
+      imsakNotificationId,
+      'وقت الإمساك',
+      imsakDt.hour,
+      imsakDt.minute,
+      body: 'حان الآن وقت الإمساك، بقي 10 دقائق على أذان الفجر.',
+    );
+    print('✅ [PraysCubit] Scheduled Imsak at $imsakDt');
+  }
+
+  /// Cancel Imsak notification.
+  void _cancelImsakNotification() {
+    LocalNotificationService.cancelNotification(imsakNotificationId);
+  }
+
+  /// Reschedule Imsak notification when prayer times change. Called from rescheduleAllPrayerNotifications.
+  Future<void> _rescheduleImsakIfEnabled() async {
+    _cancelImsakNotification();
+    if (isImsakAlertEnabled) {
+      await _scheduleImsakNotification();
+    }
+  }
 
   Future<void> requestLocation() async {
     emit(LocationLoadingState());
