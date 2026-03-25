@@ -14,30 +14,34 @@ class FareedaSettingsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        AnimatedContainer(
-          decoration: BoxDecoration(border: Border.all(color: Color(0xffC0C0C0),),
-          borderRadius: BorderRadius.circular(15.r),
-            color: Color(0xffC5C5C5).withOpacity(0.3)
-          ),
+        AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: praysSettingsCubit.isExpand
-              ? praysSettingsCubit.isFaredaExpand
-                  ? 670
-                  : 560
-              : 0,
-          child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                ImsakTile(praysCubit: praysCubit),
-                ...List.generate(7, (index) {
-                  return FaredaTile(
-                    praysSettingsCubit: praysSettingsCubit,
-                    index: index,
-                    praysCubit: praysCubit,
-                  );
-                }),
-              ]),
+          child: praysSettingsCubit.isExpand
+              ? Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xffC0C0C0),
+                    ),
+                    borderRadius: BorderRadius.circular(15.r),
+                    color: const Color(0xffC5C5C5).withOpacity(0.3),
+                  ),
+                  child: ListView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    children: [
+                      ImsakTile(praysCubit: praysCubit),
+                      ...List.generate(7, (index) {
+                        return FaredaTile(
+                          praysSettingsCubit: praysSettingsCubit,
+                          index: index,
+                          praysCubit: praysCubit,
+                        );
+                      }),
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
 
       ],

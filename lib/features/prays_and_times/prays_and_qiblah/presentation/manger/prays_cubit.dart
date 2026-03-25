@@ -389,6 +389,11 @@ class PraysCubit extends Cubit<PraysState> {
 
       print(
           '✅ [PraysCubit] Alarm re-scheduled successfully with sound: $soundPath');
+
+      // Fajr sound changed → Imsak must follow the same muezzin.
+      if (index == 0) {
+        await _rescheduleImsakIfEnabled();
+      }
     } catch (e) {
       print('❌ [PraysCubit] Error re-scheduling alarm: $e');
     }
@@ -498,21 +503,49 @@ class PraysCubit extends Cubit<PraysState> {
 
   double faredaTime = 5;
 
-  /// Returns Imsak time (Fajr - 10 minutes). Handles midnight crossover:
-  /// e.g. Fajr 00:05 -> Imsak 23:55 previous day. We pass hour/minute to the
-  /// scheduler which uses current day; the scheduler correctly finds the next
-  /// occurrence (e.g. tonight 23:55 if now is after midnight).
+  /// Returns Imsak time (Fajr - 10 minutes) as a plain DateTime for display.
   DateTime? getImsakDateTime() {
     if (datePraysTimes.isEmpty) return null;
     final fajrTime = datePraysTimes[0];
     return fajrTime.subtract(const Duration(minutes: imsakMinutesBeforeFajr));
   }
 
+  /// Computes the next timezone-aware TZDateTime for Imsak (Fajr schedule - 10 min).
+  /// Handles the edge case where Imsak has already passed but Fajr hasn't yet
+  /// (e.g. now is 04:55, Fajr at 05:00 → Imsak 04:50 already passed → schedule tomorrow).
+  tz.TZDateTime? _nextImsakTZDateTime(tz.TZDateTime currentTime) {
+    if (datePraysTimes.isEmpty) return null;
+
+    var fajrSchedule = tz.TZDateTime(
+      tz.local,
+      currentTime.year,
+      currentTime.month,
+      currentTime.day,
+      datePraysTimes[0].hour,
+      datePraysTimes[0].minute,
+    );
+    if (fajrSchedule.isBefore(currentTime)) {
+      fajrSchedule = fajrSchedule.add(const Duration(days: 1));
+    }
+
+    var imsakSchedule = fajrSchedule
+        .subtract(const Duration(minutes: imsakMinutesBeforeFajr));
+
+    // Between Imsak and Fajr: Imsak passed but Fajr still upcoming today.
+    // Advance another day so we schedule tomorrow's Imsak.
+    if (imsakSchedule.isBefore(currentTime)) {
+      fajrSchedule = fajrSchedule.add(const Duration(days: 1));
+      imsakSchedule = fajrSchedule
+          .subtract(const Duration(minutes: imsakMinutesBeforeFajr));
+    }
+
+    return imsakSchedule;
+  }
+
   /// Formatted Imsak time string for display (12h or 24h based on Is24Format).
   String getImsakTimeFormatted() {
     final dt = getImsakDateTime();
     if (dt == null) return '--:--';
-    // Use same format as prayer times - stringPraysTimes12Format/24Format
     if (Is24Format.is24TimeFormat) {
       return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     }
@@ -525,35 +558,51 @@ class PraysCubit extends Cubit<PraysState> {
     isImsakAlertEnabled = value;
     CacheHelper.saveData(key: 'is_imsak_alert_enabled', value: value);
     if (!value) {
-      LocalNotificationService.cancelNotification(imsakNotificationId);
+      await _cancelImsakNotification();
     } else {
       await _scheduleImsakNotification();
     }
     emit(ChangeFaredaState());
   }
 
-  /// Schedule Imsak notification. Called when enabled or when prayer times are refreshed.
+  /// Schedule Imsak adhan via the native AlarmManager pipeline (same as Fajr).
+  /// Sound is inherited from Fajr's current reader setting.
   Future<void> _scheduleImsakNotification() async {
-    final imsakDt = getImsakDateTime();
-    if (imsakDt == null) return;
-    LocalNotificationService.showDailySchduledNotification(
-      imsakNotificationId,
-      'وقت الإمساك',
-      imsakDt.hour,
-      imsakDt.minute,
-      body: 'حان الآن وقت الإمساك، بقي 10 دقائق على أذان الفجر.',
+    if (datePraysTimes.isEmpty) return;
+
+    tz.initializeTimeZones();
+    final currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    final currentTime = tz.TZDateTime.now(tz.local);
+
+    final imsakSchedule = _nextImsakTZDateTime(currentTime);
+    if (imsakSchedule == null) return;
+
+    // Inherit Fajr's reader sound; fall back to Alafasi if reader id has no asset.
+    String? soundPath = AdhanSoundMapper.getAssetPath(prayList[0].readerId);
+    if (soundPath == null || soundPath.isEmpty) {
+      soundPath = AdhanSoundMapper.getAssetPath(1);
+    }
+    if (soundPath == null || soundPath.isEmpty) return;
+
+    await AlarmHelper.setPrayerAlarm(
+      id: imsakNotificationId,
+      prayerName: 'الإمساك',
+      prayerTime: imsakSchedule,
+      customSoundPath: soundPath,
     );
-    print('✅ [PraysCubit] Scheduled Imsak at $imsakDt');
+    print('✅ [PraysCubit] Scheduled Imsak adhan at $imsakSchedule');
   }
 
-  /// Cancel Imsak notification.
-  void _cancelImsakNotification() {
+  /// Cancel Imsak adhan alarm (native AlarmManager) and local notification.
+  Future<void> _cancelImsakNotification() async {
     LocalNotificationService.cancelNotification(imsakNotificationId);
+    await AlarmHelper.cancelPrayerAlarm(imsakNotificationId);
   }
 
-  /// Reschedule Imsak notification when prayer times change. Called from rescheduleAllPrayerNotifications.
+  /// Reschedule Imsak when prayer times or Fajr reader change.
   Future<void> _rescheduleImsakIfEnabled() async {
-    _cancelImsakNotification();
+    await _cancelImsakNotification();
     if (isImsakAlertEnabled) {
       await _scheduleImsakNotification();
     }
