@@ -3,7 +3,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+// import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import 'package:gal/gal.dart';
 import 'package:norway_roznama_new_project/features/articles_and_stickers/data/model/stickers/stickers_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -113,23 +114,9 @@ class StickersCubit extends Cubit<StickersState> {
       final Uint8List imageBytes = Uint8List.fromList(response.data);
 
       // Save to gallery - this will make it visible in gallery apps
-      final result = await ImageGallerySaverPlus.saveImage(
-        imageBytes,
-        name: sanitizedFileName.replaceAll('.png', ''),
-        quality: 100,
-      );
-
-      // Extract path from result
-      final savedPath =
-          result['filePath'] as String? ?? result['path'] as String? ?? '';
-
-      if (result['isSuccess'] == true && savedPath.isNotEmpty) {
-        emit(StickerSavedSuccess(message: "تم حفظ الملصق في معرض الصور بنجاح"));
-        return savedPath;
-      } else {
-        emit(StickerSavedFailure(error: "حدث خطأ أثناء حفظ الملصق"));
-        throw Exception('Failed to save image to gallery');
-      }
+      await Gal.putImageBytes(imageBytes, name: sanitizedFileName);
+      emit(StickerSavedSuccess(message: "تم حفظ الملصق في معرض الصور بنجاح"));
+      return sanitizedFileName;
     } catch (e) {
       emit(StickerSavedFailure(
           error: "حدث خطأ أثناء حفظ الملصق: ${e.toString()}"));

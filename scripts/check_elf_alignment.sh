@@ -98,11 +98,11 @@ for match in $matches; do
 
   res="$(objdump -p "${match}" | grep LOAD | awk '{ print $NF }' | head -1)"
   if [[ $res =~ 2\*\*(1[4-9]|[2-9][0-9]|[1-9][0-9]{2,}) ]]; then
-    echo -e "${match}: ${GREEN}ALIGNED${ENDCOLOR} ($res)"
+    echo "${match} -> ALIGNED (16KB compatible)"
   else
-    echo -e "${match}: ${RED}UNALIGNED${ENDCOLOR} ($res)"
+    echo "${match} -> UNALIGNED (NOT 16KB compatible)"
     unaligned_libs+=("${match}")
-  fi
+  fi  
 done
 
 if [ ${#unaligned_libs[@]} -gt 0 ]; then

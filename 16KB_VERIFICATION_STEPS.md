@@ -4,6 +4,21 @@
 
 ---
 
+## Build baseline (required for 16 KB compatibility)
+
+| Component | Required version |
+|-----------|------------------|
+| Flutter SDK | 3.24+ (3.27+ recommended per pubspec.lock) |
+| Android Gradle Plugin (AGP) | 8.5.1+ (project uses 8.6.0) |
+| Android NDK | 27.0.12077973 |
+| compileSdk | 36 |
+| targetSdk | 36 |
+| minSdk | 24 |
+
+These values are pinned in `android/app/build.gradle` and `android/settings.gradle` for reproducibility across machines and CI.
+
+---
+
 ## الطريقة 1: التحقق عبر Emulator (الأبسط)
 
 ### الخطوة 1: إنشاء Emulator يدعم 16 KB
@@ -151,6 +166,16 @@ bash scripts/check_elf_alignment.sh build/app/outputs/flutter-apk/app-release.ap
 - **ELF Verification Successful:** تحقق ناجح
 
 إذا كان `zipalign` مثبتاً (build-tools 35.0.0-rc3+)، السكربت يعرض أيضاً نتيجة zip alignment.
+
+---
+
+## Validation summary (16 KB compliance)
+
+After applying the baseline pinning and running the audit:
+
+1. **ELF alignment script:** `scripts/check_elf_alignment.sh` reported **ELF Verification Successful** on the release APK (all `.so` files ALIGNED).
+2. **Install and launch:** The release APK installs and launches successfully on the connected emulator with no ELF/16 KB errors in logcat.
+3. **Play Console:** Upload the AAB at `build\app\outputs\bundle\release\app-release.aab` to an Internal Testing track and confirm the "ELF alignment check failed" warning no longer appears.
 
 ---
 

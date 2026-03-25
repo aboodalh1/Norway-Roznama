@@ -2,7 +2,7 @@ name: norway_roznama_new_project
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.1+4
+version: 1.0.1+5
 
 environment:
   sdk: ^3.6.1
@@ -19,7 +19,7 @@ dependencies:
   dartz: ^0.10.1
   get_it: ^8.0.3
   flutter_launcher_icons: ^0.14.2
-  mobile_scanner: ^6.0.5
+  mobile_scanner: ^6.0.11
   fancy_shimmer_image: ^2.0.3
   path_provider: ^2.1.4
   share_plus: ^10.0.0
@@ -43,7 +43,7 @@ dependencies:
   firebase_messaging: ^14.7.10
   file_picker: ^10.1.0
   media_scanner: ^2.2.0
-  image_gallery_saver_plus: ^4.0.1
+  # image_gallery_saver_plus: ^4.0.1
   hijri: ^3.0.0
   just_audio: ^0.10.4
     # New dependencies for improved alarm functionality
@@ -54,6 +54,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.17
   audio_service: ^0.18.18
   workmanager: ^0.7.0
+  gal: ^2.3.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
