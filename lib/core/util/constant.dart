@@ -94,13 +94,13 @@ void fetchLocation() async {
 }
 
 List<PrayModel> prayList = [
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
-  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 0),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
+  PrayModel(isNotify: false, reader: "مشاري العفاسي", time: 5, readerId: 1),
 ];
 
 List<PrayModel> nawafelList = [

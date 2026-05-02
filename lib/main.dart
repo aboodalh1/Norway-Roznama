@@ -7,12 +7,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:norway_roznama_new_project/core/audio/adhan_audio_handler.dart';
+import 'package:norway_roznama_new_project/core/services/reminder_reconcile_handler.dart';
+import 'package:norway_roznama_new_project/core/services/reminder_worker_handler.dart';
 import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 import 'package:norway_roznama_new_project/core/util/cacheHelper.dart';
 import 'package:norway_roznama_new_project/features/monthly_timing/data/repos/monthly_timing_repo_impl.dart';
+import 'package:norway_roznama_new_project/features/prays_and_times/prays_settings/data/repo/reminder_config_repository.dart';
 import 'package:norway_roznama_new_project/features/splash_screen/presentation/view/splash_screen.dart';
 import 'package:workmanager/workmanager.dart';
 import 'bloc_observer.dart';
+import 'core/services/reminder_scheduler.dart';
 import 'core/util/constant.dart';
 import 'core/util/service_locator.dart';
 import 'features/articles_and_stickers/data/repos/articles_repo_impl.dart';
@@ -32,12 +36,24 @@ late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 // Your callback dispatcher as defined above
 @pragma('vm:entry-point')
 void callbackDispatcher() {
-  print("ffffffffff");
   Workmanager().executeTask((taskName, inputData) async {
     try {
-      print("ffffffffff");
       WidgetsFlutterBinding.ensureInitialized();
 
+      // Route reminder tasks to the dedicated reminder worker handler.
+      if (taskName == kReminderTaskName) {
+        print('[callbackDispatcher] Handling reminder task. instanceId=${inputData?['instanceId']}');
+        await CacheHelper.init();
+        return await handleReminderTask(inputData);
+      }
+
+      // Route reconcile tasks (triggered after reboot/timezone/time change).
+      if (taskName == kReminderReconcileTaskName) {
+        print('[callbackDispatcher] Handling reminder reconcile task.');
+        return await handleReminderReconcileTask();
+      }
+
+      // Legacy adhan audio task path (retained for backward compatibility).
       await initAdhanAudioHandler();
 
       final alarmId = inputData?['id'] ?? 1;
@@ -55,7 +71,7 @@ void callbackDispatcher() {
 
       print('✅ Alarm callback completed successfully for ID: $alarmId');
     } catch (e) {
-      print('❌ Error in alarm callback: $e');
+      print('❌ Error in callbackDispatcher: $e');
     }
     return Future.value(true);
   });
@@ -316,6 +332,21 @@ Future<void> main() async {
 
     // Initialize cache helper
     await CacheHelper.init();
+
+    // Run reminder config migration (no-op after first run).
+    ReminderConfigRepository.runMigrationIfNeeded();
+
+    // Register the dedicated reminder notification channel.
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            kReminderChannelId,
+            kReminderChannelName,
+            importance: Importance.high,
+          ),
+        );
 
     // Setup service locator
     setupServiceLocator();

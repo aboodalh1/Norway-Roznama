@@ -92,6 +92,22 @@
             android:enabled="true"
             android:exported="true" />
 
+        <!-- Reminder reconcile receiver: re-schedules WorkManager reminder tasks
+             after reboot, app update, timezone change, or manual time change. -->
+        <receiver
+            android:name=".ReminderSystemEventReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name="com.dexterous.flutterlocalnotifications.ForegroundService"
             android:foregroundServiceType="mediaPlayback"

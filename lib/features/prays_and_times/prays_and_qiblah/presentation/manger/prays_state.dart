@@ -41,3 +41,6 @@ class LocationMissedState extends PraysState {
 class LocationLoadingState extends PraysState {}
 
 class LocationFailureState extends PraysState {}
+
+/// Emitted when a prayer sub-reminder slot config changes.
+final class ChangeReminderState extends PraysState {}

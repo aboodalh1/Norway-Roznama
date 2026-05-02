@@ -12,7 +12,7 @@ class AlarmHelper {
   /// [prayerTime] - DateTime when the alarm should fire
   /// [customSoundPath] - Optional custom adhan sound path (from assets)
   ///                     If not provided, defaults to Alafasi (backend ID 1)
-  static Future<void> setPrayerAlarm({
+  static Future<bool> setPrayerAlarm({
     required int id,
     required String prayerName,
     required DateTime prayerTime,
@@ -31,13 +31,20 @@ class AlarmHelper {
     print(
         '📿 [AlarmHelper] Scheduling $prayerName alarm at $prayerTime with sound: $soundPath');
 
-    await AdhanService.schedule(
+    final scheduled = await AdhanService.schedule(
       alarmId: id,
       scheduledTime: prayerTime,
       soundPath: soundPath,
       title: 'وقت صلاة $prayerName',
       body: 'حان الآن وقت صلاة $prayerName',
     );
+
+    if (!scheduled) {
+      print(
+          '❌ [AlarmHelper] Failed to schedule $prayerName alarm. Check exact alarm permission and native logs.');
+    }
+
+    return scheduled;
   }
 
   /// Cancel a scheduled prayer alarm.
