@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:norway_roznama_new_project/alarm_helper.dart';
 import 'package:norway_roznama_new_project/core/services/reminder_scheduler.dart';
@@ -10,6 +13,8 @@ import 'package:norway_roznama_new_project/features/prays_and_times/prays_settin
 import 'package:norway_roznama_new_project/notification_service.dart';
 import 'package:norway_roznama_new_project/core/util/Is24Format.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/util/constant.dart';
 import '../../data/model/prays_model.dart';
@@ -255,6 +260,254 @@ class PraysCubit extends Cubit<PraysState> {
     }
     emit(GetPrayersTimesSuccess(message: ''));
     return nearestTime;
+  }
+
+  Future<void> saveTodayPrayerTimesAsPdf() async {
+    if (datePraysTimes.length < 7 ||
+        stringPraysTimes12Format.length < 7 ||
+        stringPraysTimes24Format.length < 7) {
+      emit(SavePrayerTimesPdfFailureState(
+          error: "أوقات الصلاة غير مكتملة، حاول تحديث الأوقات أولاً"));
+      return;
+    }
+
+    emit(SavePrayerTimesPdfLoadingState());
+
+    try {
+      final now = DateTime.now();
+      final dateText = DateFormat('yyyy-MM-dd').format(now);
+      final dayText = days[DateFormat('E').format(now)] ?? '';
+      final hijriDate = prayersModel.data.hijriDate.trim();
+      final shownTimes = Is24Format.is24TimeFormat
+          ? stringPraysTimes24Format
+          : stringPraysTimes12Format;
+
+      final fontData = await rootBundle.load("assets/fonts/Amiri-Regular.ttf");
+      final arabicFont = pw.Font.ttf(fontData);
+      final logoData = await rootBundle.load('assets/img/logo2.jpg');
+      final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+      final pdf = pw.Document();
+
+      pw.Widget metaChip(String text) {
+        return pw.Container(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: pw.BoxDecoration(
+            color: PdfColor.fromHex('#EDF7EE'),
+            borderRadius: pw.BorderRadius.circular(12),
+            border: pw.Border.all(color: PdfColor.fromHex('#CDE8D0')),
+          ),
+          child: pw.Text(
+            text,
+            style: pw.TextStyle(
+              font: arabicFont,
+              fontSize: 12,
+              color: PdfColor.fromHex('#285A2A'),
+            ),
+          ),
+        );
+      }
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(28),
+          build: (context) {
+            return pw.Directionality(
+              textDirection: pw.TextDirection.rtl,
+              child: pw.Stack(
+                children: [
+                  pw.Positioned.fill(
+                    child: pw.Center(
+                      child: pw.Opacity(
+                        opacity: 0.08,
+                        child: pw.Image(logoImage, width: 300, height: 300),
+                      ),
+                    ),
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Container(
+                        padding: const pw.EdgeInsets.all(18),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColor.fromHex('#057107'),
+                          borderRadius: pw.BorderRadius.circular(18),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.Container(
+                              width: 58,
+                              height: 58,
+                              padding: const pw.EdgeInsets.all(6),
+                              decoration: pw.BoxDecoration(
+                                color: PdfColors.white,
+                                borderRadius: pw.BorderRadius.circular(14),
+                              ),
+                              child:
+                                  pw.Image(logoImage, fit: pw.BoxFit.contain),
+                            ),
+                            pw.SizedBox(width: 14),
+                            pw.Expanded(
+                              child: pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: [
+                                  pw.Text(
+                                    'أوقات الصلاة',
+                                    style: pw.TextStyle(
+                                      font: arabicFont,
+                                      fontSize: 28,
+                                      fontWeight: pw.FontWeight.bold,
+                                      color: PdfColors.white,
+                                    ),
+                                  ),
+                                  pw.SizedBox(height: 4),
+                                  pw.Text(
+                                    'جدول أوقات الصلاة لهذا اليوم',
+                                    style: pw.TextStyle(
+                                      font: arabicFont,
+                                      fontSize: 13,
+                                      color: PdfColor.fromHex('#EAF7EA'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.SizedBox(height: 18),
+                      pw.Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (dayText.isNotEmpty) metaChip('اليوم: $dayText'),
+                          metaChip('التاريخ الميلادي: $dateText'),
+                          if (hijriDate.isNotEmpty)
+                            metaChip('التاريخ الهجري: $hijriDate'),
+                        ],
+                      ),
+                      if (isOslo) ...[
+                        pw.SizedBox(height: 12),
+                        pw.Container(
+                          padding: const pw.EdgeInsets.all(12),
+                          decoration: pw.BoxDecoration(
+                            color: PdfColor.fromHex('#FFF4E5'),
+                            borderRadius: pw.BorderRadius.circular(12),
+                            border: pw.Border.all(
+                              color: PdfColor.fromHex('#F2C27B'),
+                            ),
+                          ),
+                          child: pw.Text(
+                            'تنبيه: أوقات الصلاة بتوقيت مدينة أوسلو، النرويج',
+                            style: pw.TextStyle(
+                              font: arabicFont,
+                              fontSize: 13,
+                              color: PdfColor.fromHex('#8A4F00'),
+                            ),
+                          ),
+                        ),
+                      ],
+                      pw.SizedBox(height: 18),
+                      pw.Container(
+                        decoration: pw.BoxDecoration(
+                          borderRadius: pw.BorderRadius.circular(16),
+                          border:
+                              pw.Border.all(color: PdfColor.fromHex('#DADADA')),
+                        ),
+                        child: pw.Table(
+                          border: pw.TableBorder.symmetric(
+                            inside: pw.BorderSide(
+                              color: PdfColor.fromHex('#E6E6E6'),
+                              width: 0.8,
+                            ),
+                          ),
+                          columnWidths: const {
+                            0: pw.FlexColumnWidth(2),
+                            1: pw.FlexColumnWidth(3),
+                          },
+                          children: [
+                            pw.TableRow(
+                              decoration: pw.BoxDecoration(
+                                color: PdfColor.fromHex('#EDF7EE'),
+                                borderRadius: const pw.BorderRadius.only(
+                                  topLeft: pw.Radius.circular(16),
+                                  topRight: pw.Radius.circular(16),
+                                ),
+                              ),
+                              children: [
+                                _pdfCell('الوقت', arabicFont, isHeader: true),
+                                _pdfCell('الصلاة', arabicFont, isHeader: true),
+                              ],
+                            ),
+                            ...List.generate(praysName.length, (index) {
+                              return pw.TableRow(
+                                decoration: pw.BoxDecoration(
+                                  color: index.isEven
+                                      ? PdfColors.white
+                                      : PdfColor.fromHex('#FAFAFA'),
+                                ),
+                                children: [
+                                  _pdfCell(shownTimes[index], arabicFont),
+                                  _pdfCell(praysName[index].trim(), arabicFont),
+                                ],
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      pw.Spacer(),
+                      pw.Divider(color: PdfColor.fromHex('#DADADA')),
+                      pw.Text(
+                        'تم إنشاء الملف من تطبيق Norway Roznama',
+                        textAlign: pw.TextAlign.center,
+                        style: pw.TextStyle(
+                          font: arabicFont,
+                          fontSize: 11,
+                          color: PdfColor.fromHex('#666666'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      if (!downloadsDir.existsSync()) {
+        downloadsDir.createSync(recursive: true);
+      }
+      final file = File('${downloadsDir.path}/أوقات الصلاة $dateText.pdf');
+      await file.writeAsBytes(await pdf.save());
+      emit(SavePrayerTimesPdfSuccessState(message: 'تم حفظ PDF في: ${file.path}'));
+    } catch (e) {
+      print(e);
+      emit(SavePrayerTimesPdfFailureState(error: "حدث خطأ ما! أعد المحاولة"));
+    }
+  }
+
+  pw.Widget _pdfCell(
+    String text,
+    pw.Font font, {
+    bool isHeader = false,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: pw.Text(
+        text,
+        textAlign: pw.TextAlign.center,
+        style: pw.TextStyle(
+          font: font,
+          fontSize: isHeader ? 15 : 14,
+          fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
+          color: isHeader
+              ? PdfColor.fromHex('#285A2A')
+              : PdfColor.fromHex('#222222'),
+        ),
+      ),
+    );
   }
 
   PrayersModel prayersModel = PrayersModel(

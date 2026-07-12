@@ -28,6 +28,20 @@ final class GetPrayersTimesError extends PraysState {
   GetPrayersTimesError({required this.error});
 }
 
+final class SavePrayerTimesPdfLoadingState extends PraysState {}
+
+final class SavePrayerTimesPdfSuccessState extends PraysState {
+  final String message;
+
+  SavePrayerTimesPdfSuccessState({required this.message});
+}
+
+final class SavePrayerTimesPdfFailureState extends PraysState {
+  final String error;
+
+  SavePrayerTimesPdfFailureState({required this.error});
+}
+
 final class ChangeSwitchState extends PraysState {}
 
 final class ChangeReaderState extends PraysState {}

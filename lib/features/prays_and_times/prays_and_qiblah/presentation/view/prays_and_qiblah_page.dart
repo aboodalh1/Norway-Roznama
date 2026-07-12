@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:norway_roznama_new_project/core/widgets/custom_snack_bar.dart';
 import 'package:norway_roznama_new_project/core/util/functions.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_and_qiblah/presentation/view/widgets/internet_check_widget.dart';
 import 'package:norway_roznama_new_project/features/prays_and_times/prays_and_qiblah/presentation/view/widgets/pray_card.dart';
@@ -16,7 +17,15 @@ class PraysAndQiblahPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: BlocBuilder<PraysCubit, PraysState>(
+      child: BlocConsumer<PraysCubit, PraysState>(
+        listener: (context, state) {
+          if (state is SavePrayerTimesPdfSuccessState) {
+            customSnackBar(context, state.message);
+          }
+          if (state is SavePrayerTimesPdfFailureState) {
+            customSnackBar(context, state.error, color: Colors.red);
+          }
+        },
         builder: (context, state) {
           PraysCubit praysCubit = context.read<PraysCubit>();
           return Scaffold(
@@ -48,6 +57,30 @@ class PraysAndQiblahPage extends StatelessWidget {
                     size: 20.sp,
                   ),
                 ),
+                state is SavePrayerTimesPdfLoadingState
+                    ? Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 10.h, horizontal: 10.w),
+                        child: SizedBox(
+                          width: 20.sp,
+                          height: 20.sp,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.w,
+                          ),
+                        ),
+                      )
+                    : IconButton(
+                        tooltip: 'حفظ الأوقات PDF',
+                        onPressed: () {
+                          praysCubit.saveTodayPrayerTimesAsPdf();
+                        },
+                        icon: Icon(
+                          Icons.picture_as_pdf,
+                          color: Colors.white,
+                          size: 20.sp,
+                        ),
+                      ),
                 IconButton(
                   tooltip: 'اعدادات التنبيهات',
                   onPressed: () {
